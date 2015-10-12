@@ -1,0 +1,24 @@
+{
+  "name": "deep-breath",
+  "version": "0.0.0",
+  "description": "Air pollution information app server",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "StefanDywersant <karol.maciaszek@gmail.com> (https://github.com/StefanDywersant)",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.4.0",
+    "config": "^1.16.0",
+    "js-yaml": "^3.4.2",
+    "pg": "^4.4.2",
+    "pg-hstore": "^2.3.2",
+    "q": "^1.4.1",
+    "q-ratelimit": "0.0.2",
+    "qthrottle": "^0.2.1",
+    "redis": "^2.1.0",
+    "sequelize": "^3.11.0",
+    "winston": "^1.1.0"
+  }
+}
