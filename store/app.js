@@ -1,0 +1,1 @@
+var modelSync = require('./models/sync');

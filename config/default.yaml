@@ -1,0 +1,42 @@
+rabbitmq:
+  url: 'amqp://localhost'
+
+logger:
+  console:
+    level: 'silly'
+
+store:
+  rabbitmq:
+    exchange: 'deepbreath'
+    queue: 'store'
+  database:
+    url: 'postgres://maciaszk@localhost:5432/deepbreath'
+
+datasource:
+  pl-wielkopolskie:
+    api:
+      host: 'powietrze.poznan.wios.gov.pl'
+      paths:
+        stations: '/'
+        configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
+        measurements: '/dane-pomiarowe/pobierz'
+      ratelimit: 2000
+
+    rabbitmq:
+      exchange: 'deepbreath'
+      queue: 'datasource.pl-wielkopolskie'
+
+    measurements:
+      start_date_epsilon: 86400000 # 24 hours
+      cache_ttl: 1800000 # 30 mins
+
+    configuration:
+      cache_ttl: 3600000 # 1 hour
+
+    stations:
+      cache_ttl: 3600000 # 1 hour
+
+    redis:
+      host: 'localhost'
+      port: 6379
+      prefix: 'deep-breath:pl-wielkopolskie:'
