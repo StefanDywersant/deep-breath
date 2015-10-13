@@ -1,28 +1,21 @@
 var amqp = require('amqplib'),
-	config = require('config'),
 	logger = require('./logger');
 
 
-/**
- * Initializes RabbitMQ connection.
- *
- * @author Karol Maciaszek <karol.maciaszek@contractors.roche.com>
- * @returns {!!Promise}
- */
-var init = function() {
-	logger.info('[rabbitmq] Initializing RabbitMQ connection...');
+var init = function(config) {
+	logger.info('[rabbitmq:init] Connectiong to %s...', config.url);
 
 	return amqp.connect(
-		config.rabbitmq.url
+		config.url
 	).then(function(connection) {
 		// close connection on process termination
 		process.once('SIGINT', function() {
 			connection.close();
 		});
 
-		logger.info('[rabbitmq] Initialized RabbitMQ connection');
+		logger.info('[rabbitmq:init] Connected to %s', config.url);
 		return connection;
 	});
 };
 
-module.exports = init();
+module.exports = init;

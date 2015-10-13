@@ -5,8 +5,8 @@ var configuration = require('./configuration'),
 var entitize = function(apiChannel) {
 	return {
 		id: apiChannel.channel_id,
-		paramId: apiChannel.param_id,
-		unitId: apiChannel.unit_id
+		param_code: apiChannel.param_id,
+		unit_code: apiChannel.unit_id
 	};
 };
 

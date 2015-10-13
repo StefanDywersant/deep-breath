@@ -1,23 +1,30 @@
 var stations = require('./api/stations'),
 	measurements = require('./api/measurements'),
 	redis = require('../../service/redis'),
-	config = require('config');
+	config = require('config'),
+	outbound = require('./mq/outbound'),
+	logger = require('../../service/logger'),
+	types = require('../../types/types.js');
 
 
 redis.init(config.datasource['pl-wielkopolskie'].redis);
 
-stations.all().done(function(stations) {
-	console.log(stations);
-
-/*	measurements.byDate(new Date('07/21/2004'), stations[6]).done(function(measurements) {
-		console.log(JSON.stringify(measurements));
-	}, function(error) {
-		console.log(error);
+stations.all().then(function(stations) {
+	return outbound.send({
+		type: types.MQ.ANNOUNCE,
+		datasource_code: 'pl-wielkopolskie',
+		payload: stations.map(function(station) {
+			return {
+				code: 'pl-wielkopolskie:' + station.id,
+				name: station.name,
+				address: station.address,
+				longitude: station.position.lng,
+				latitude: station.position.lat,
+				country_code: 'pl',
+				channels: station.channels
+			};
+		})
 	});
-*/
-	measurements.fromDate(new Date(0), stations[6]).then(function(date) {
-		console.log('BEGIN DATE', date);
-	});
-}, function(error) {
-	console.log(error);
+}).fail(function(error) {
+	console.log(error.stack);
 });

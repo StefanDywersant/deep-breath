@@ -1,6 +1,7 @@
 var sequelize = require('../service/sequelize'),
 	Sequelize = require('sequelize'),
-	Countries = require('./countries');
+	Countries = require('./countries'),
+	Datasources = require('./datasources');
 
 var Stations = sequelize.define(
 	'station',
@@ -10,7 +11,7 @@ var Stations = sequelize.define(
 			primaryKey: true,
 			defaultValue: Sequelize.UUIDV4
 		},
-		source_id: {
+		code: {
 			type: Sequelize.STRING(256),
 			allowNull: false
 		},
@@ -30,7 +31,7 @@ var Stations = sequelize.define(
 			}
 		},
 		latitude: {
-			type: Sequelize.STRING,
+			type: Sequelize.FLOAT,
 			allowNull: false,
 			validate: {
 				min: -90,
@@ -47,5 +48,6 @@ var Stations = sequelize.define(
 );
 
 Stations.belongsTo(Countries, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
+Stations.belongsTo(Datasources, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
 
 module.exports = Stations;

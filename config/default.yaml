@@ -7,6 +7,7 @@ logger:
 
 store:
   rabbitmq:
+    url: 'amqp://localhost'
     exchange: 'deepbreath'
     queue: 'store'
   database:
@@ -23,6 +24,7 @@ datasource:
       ratelimit: 2000
 
     rabbitmq:
+      url: 'amqp://localhost'
       exchange: 'deepbreath'
       queue: 'datasource.pl-wielkopolskie'
 
