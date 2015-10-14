@@ -24,8 +24,9 @@ module.exports = rabbitmq.then(function(connection) {
 				if (envelope.type == types.MQ.ANNOUNCE) {
 					announce(envelope.payload, envelope.datasource_code).done(function() {
 						channel.ack(message);
-					}, function() {
-						channel.nack(message, null, true);
+					}, function(error) {
+						channel.nack(message, null, true)
+						logger.error('[mq:inbound] Error: ' + error.message, error.stack);
 					});
 				}
 			} catch (error) {

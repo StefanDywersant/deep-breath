@@ -13,6 +13,10 @@ var Parameters = sequelize.define(
 		name: {
 			type: Sequelize.STRING(256),
 			allowNull: false
+		},
+		code: {
+			type: Sequelize.STRING(16),
+			allowNull: false
 		}
 	},
 	{

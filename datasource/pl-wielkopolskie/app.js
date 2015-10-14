@@ -21,7 +21,12 @@ stations.all().then(function(stations) {
 				longitude: station.position.lng,
 				latitude: station.position.lat,
 				country_code: 'pl',
-				channels: station.channels
+				channels: station.channels.map(function(channel) {
+					return {
+						code: 'pl-wielkopolskie:' + station.id + ':' + channel.id,
+						parameter_code: channel.param_id
+					}
+				})
 			};
 		})
 	});

@@ -1,8 +1,62 @@
 var Stations = require('../models/stations'),
 	Countries = require('../models/countries'),
 	Datasources = require('../models/datasources'),
+	Parameters = require('../models/parameters'),
+	Channels = require('../models/channels'),
 	q = require('q'),
 	logger = require('../../service/logger');
+
+
+var deleteChannels = function(announcedChannels, existingChannels) {
+	return q.all(existingChannels.filter(function(existingChannel) {
+		return !announcedChannels.filter(function(announcedChannel) {
+			return existingChannel.code == announcedChannel.code;
+		}).length;
+	}).map(function(deleteChannel) {
+		logger.verbose('[announce:deleteChannels] Removing channel code=' + deleteChannel.code);
+		return deleteChannel.destroy();
+	}));
+};
+
+
+var upsertChannels = function(announcedChannels, station) {
+	return q.all(announcedChannels.map(function(announcedChannel) {
+		return Parameters.findOne({where: {code: announcedChannel.parameter_code}}).then(function(parameter) {
+			if (!parameter) {
+				logger.warn('[announce:upsertChannels] Parameter not found code=%s station.code=%s', announcedChannel.parameter_code, station.code);
+				return null;
+			}
+
+			var dbChannel = {
+				code: announcedChannel.code,
+				station_uuid: station.uuid,
+				parameter_uuid: parameter.uuid
+			};
+
+			return Channels.findOne({
+				where: {code: announcedChannel.code, station_uuid: station.uuid},
+				paranoid: false
+			}).then(function(channel) {
+				if (!channel) {
+					logger.verbose('[announce:upsertChannels] Creating channel code=%s', dbChannel.code);
+					return Channels.create(dbChannel);
+				}
+
+				if (channel.deleted_at) {
+					logger.verbose('[announce:upsertChannels] Restoring channel code=%s', dbChannel.code);
+
+					return channel.restore().then(function() {
+						logger.verbose('[announce:upsertChannels] Updating channel code=%s', dbChannel.code);
+						return channel.update(dbChannel);
+					});
+				}
+
+				logger.verbose('[announce:upsertChannels] Updating channel code=%s', dbChannel.code);
+				return channel.update(dbChannel);
+			});
+		});
+	}));
+};
 
 
 var deleteStations = function(announcedStations, existingStations) {
@@ -53,6 +107,12 @@ var upsertStations = function(announcedStations, datasource) {
 
 				logger.verbose('[announce:upsertStations] Updating station code=%s', dbStation.code);
 				return station.update(dbStation);
+			}).then(function(station) {
+				return Channels.findAll({where: {station_uuid: station.uuid}}).then(function(existingChannels) {
+					return upsertChannels(announcedStation.channels, station).then(function() {
+						return deleteChannels(announcedStation.channels, existingChannels);
+					});
+				});
 			});
 		});
 	}));

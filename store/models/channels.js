@@ -10,6 +10,10 @@ var Channels = sequelize.define(
 			type: Sequelize.UUID,
 			primaryKey: true,
 			defaultValue: Sequelize.UUIDV4
+		},
+		code: {
+			type: Sequelize.STRING(32),
+			allowNull: false
 		}
 	},
 	{
@@ -20,7 +24,7 @@ var Channels = sequelize.define(
 	}
 );
 
-Channels.belongsTo(Stations, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
+Channels.belongsTo(Stations, {foreignKey: { allowNull: false }, onDelete: 'CASCADE'});
 Channels.belongsTo(Parameters, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
 
 module.exports = Channels;

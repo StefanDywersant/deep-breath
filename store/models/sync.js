@@ -42,5 +42,107 @@ module.exports = function() {
 		return Datasources.create({
 			code: 'pl-wielkopolskie'
 		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f µg/m³'
+		}).then(function(unit) {
+			return q.all([
+				Parameters.create({
+					name: 'Pył zawieszony PM₁₀',
+					code: 'pm10',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Pył zawieszony PM₂.₅',
+					code: 'pm2.5',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Dwutlenek siarki SO₂',
+					code: 'so2',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Tlenek węgla CO',
+					code: 'co',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Dwutlenek azotu NO₂',
+					code: 'no2',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Tlenki azotu NOₓ',
+					code: 'nox',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Tlenek azotu NO',
+					code: 'no',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Ozon O₃',
+					code: 'o3',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Benzen C₆H₆',
+					code: 'bzn',
+					unit_uuid: unit.uuid
+				})
+			]);
+		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f ⁰C'
+		}).then(function(unit) {
+			return Parameters.create({
+				name: 'Temperatura',
+				code: 'temp',
+				unit_uuid: unit.uuid
+			});
+		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f hPa'
+		}).then(function(unit) {
+			return Parameters.create({
+				name: 'Ciśnienie atmosferyczne',
+				code: 'press',
+				unit_uuid: unit.uuid
+			});
+		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f \\%'
+		}).then(function(unit) {
+			return Parameters.create({
+				name: 'Wilgotność względna',
+				code: 'humid',
+				unit_uuid: unit.uuid
+			});
+		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f m/s'
+		}).then(function(unit) {
+			return Parameters.create({
+				name: 'Prędkość wiatru',
+				code: 'ws',
+				unit_uuid: unit.uuid
+			});
+		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f ⁰'
+		}).then(function(unit) {
+			return Parameters.create({
+				name: 'Kierunek wiatru',
+				code: 'wd',
+				unit_uuid: unit.uuid
+			});
+		});
 	});
 }, 2000);*/
