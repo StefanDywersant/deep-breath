@@ -27,4 +27,23 @@ var Channels = sequelize.define(
 Channels.belongsTo(Stations, {foreignKey: { allowNull: false }, onDelete: 'CASCADE'});
 Channels.belongsTo(Parameters, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
 
+Channels.findByDatasource = function(datasource) {
+	return sequelize.query(
+		'SELECT c.* ' +
+			'FROM channels c ' +
+			'LEFT JOIN stations s ON c.station_uuid = s.uuid ' +
+			'WHERE ' +
+				's.datasource_uuid = ?' +
+				'AND c.deleted_at IS NULL',
+		{
+			replacements: [datasource.uuid],
+			model: Channels
+		}
+	);
+};
+
+Channels.findByCode = function(code) {
+	return this.findOne({where: {code: code}});
+};
+
 module.exports = Channels;

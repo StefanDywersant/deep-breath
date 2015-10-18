@@ -22,10 +22,36 @@ var Measurements = sequelize.define(
 		tableName: 'measurements',
 		paranoid: true,
 		underscored: true,
-		comment: 'Station channel measurements'
+		comment: 'Station channel measurements',
+		indexes: [
+			{
+				unique: true,
+				fields: ['timestamp', 'channel_uuid']
+			}
+		]
 	}
 );
 
 Measurements.belongsTo(Channels, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
+
+Measurements.maxTimestamp = function(channel) {
+	return this.max(
+		'timestamp',
+		{
+			where: {
+				channel_uuid: channel.uuid
+			}
+		}
+	);
+};
+
+Measurements.findByTimestamp = function(timestamp, channel) {
+	return this.findOne({
+		where: {
+			timestamp: timestamp,
+			channel_uuid: channel.uuid
+		}
+	});
+};
 
 module.exports = Measurements;

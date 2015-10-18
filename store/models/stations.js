@@ -50,4 +50,8 @@ var Stations = sequelize.define(
 Stations.belongsTo(Countries, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
 Stations.belongsTo(Datasources, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
 
+Stations.findByDatasource = function(datasource) {
+	return this.findAll({where: {datasource_uuid: datasource.uuid}});
+};
+
 module.exports = Stations;

@@ -21,7 +21,8 @@ datasource:
         stations: '/'
         configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
         measurements: '/dane-pomiarowe/pobierz'
-      ratelimit: 2000
+      ratelimit: 1000
+      retries: 10
 
     rabbitmq:
       url: 'amqp://localhost'
@@ -30,7 +31,7 @@ datasource:
 
     measurements:
       start_date_epsilon: 86400000 # 24 hours
-      cache_ttl: 1800000 # 30 mins
+      update_interval: 300000 # 5 mins
 
     configuration:
       cache_ttl: 3600000 # 1 hour

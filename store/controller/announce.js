@@ -3,8 +3,11 @@ var Stations = require('../models/stations'),
 	Datasources = require('../models/datasources'),
 	Parameters = require('../models/parameters'),
 	Channels = require('../models/channels'),
+	Measurements = require('../models/measurements'),
 	q = require('q'),
-	logger = require('../../service/logger');
+	logger = require('../../service/logger'),
+	mqOutbound = require('../mq/outbound'),
+	types = require('../../types/types');
 
 
 var deleteChannels = function(announcedChannels, existingChannels) {
@@ -118,19 +121,42 @@ var upsertStations = function(announcedStations, datasource) {
 	}));
 };
 
+
+var reqMeasurements = function(datasource) {
+	return Channels.findByDatasource(
+		datasource
+	).then(function(channels) {
+		return q.all(channels.map(function(channel) {
+			return Measurements.maxTimestamp(
+				channel
+			).then(function(timestamp) {
+				return mqOutbound.send(
+					{
+						type: types.MQ.REQ_MEASUREMENTS,
+						payload: {
+							channel_code: channel.code,
+							timestamp: timestamp ? timestamp : 0
+						}
+					},
+					'datasource:' + datasource.code
+				);
+			});
+		}));
+	});
+};
+
+
 module.exports = function(announcedStations, datasourceCode) {
 	return Datasources.findOne({where: {code: datasourceCode}}).then(function(datasource) {
 		if (!datasource)
 			throw new Error('Cannot find datasource with code: ' + datasourceCode);
 
-		return Stations.findAll({
-			where: {
-				datasource_uuid: datasource.uuid
-			}
-		}).then(function(existingStations) {
+		return Stations.findByDatasource(datasource).then(function(existingStations) {
 			return upsertStations(announcedStations, datasource).then(function() {
 				return deleteStations(announcedStations, existingStations);
 			});
+		}).then(function() {
+			return reqMeasurements(datasource);
 		});
 	});
 };

@@ -12,13 +12,13 @@ var get = function(path) {
 			host = config.api.host,
 			startTime = Date.now();
 
-		logger.debug('[api.requests:get] Request http://' + host + path);
+		logger.silly('[api.requests:get] Request http://' + host + path);
 
-		http.request({
+		var request = http.request({
 			host: host,
 			path: path
 		}, function(response) {
-			logger.debug('[api.requests:get] Response http://' + host + path + ' (' + response.statusCode + ', ' + (Date.now() - startTime) + 'ms)');
+			logger.silly('[api.requests:get] Response http://' + host + path + ' (' + response.statusCode + ', ' + (Date.now() - startTime) + 'ms)');
 
 			if (response.statusCode != 200) {
 				deferred.reject('Invalid status: ' + response.statusCode);
@@ -34,7 +34,14 @@ var get = function(path) {
 			response.on('end', function () {
 				deferred.resolve(str);
 			});
-		}).end();
+		});
+
+		request.on('error', function(error) {
+			logger.error('[requests:get] Error while processing http://%s%s: %s', host, path, error);
+			deferred.reject(error);
+		});
+
+		request.end();
 
 		return deferred.promise;
 	});
@@ -48,7 +55,7 @@ var post = function(path, data) {
 			host = config.api.host,
 			startTime = Date.now();
 
-		logger.debug('[api.requests:post] Request http://' + host + path);
+		logger.silly('[api.requests:post] Request http://' + host + path);
 
 		var request = http.request({
 			host: host,
@@ -56,10 +63,10 @@ var post = function(path, data) {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				'Content-Length': postData.length
+				'Content-Length': Buffer.byteLength(postData)
 			}
 		}, function(response) {
-			logger.debug('[api.requests:post] Response http://' + host + path + ' (' + response.statusCode + ', ' + (Date.now() - startTime) + 'ms)');
+			logger.silly('[api.requests:post] Response http://' + host + path + ' (' + response.statusCode + ', ' + (Date.now() - startTime) + 'ms)');
 
 			if (response.statusCode != 200) {
 				deferred.reject('Invalid status: ' + response.statusCode);
@@ -81,12 +88,41 @@ var post = function(path, data) {
 
 		request.end();
 
+		request.on('error', function(error) {
+			logger.error('[requests:post] Error while processing http://%s%s: %s, payload: %s', host, path, error, JSON.stringify(postData));
+			deferred.reject(error);
+		});
+
 		return deferred.promise;
 	});
 };
 
 
+var retry = function(func, left) {
+	return func().fail(function(error) {
+		logger.warn('[requests:retry] Download failed: %s. Retries left: %d', error.message, left);
+
+		if (!--left)
+			throw new Error('No more retries left: ' + error.message);
+
+		return retry(func, left);
+	});
+};
+
+
 module.exports = {
-	get: get,
-	post: post
+	get: function() {
+		var args = arguments;
+
+		return retry(function() {
+			return get.apply(this, args);
+		}, config.api.retries);
+	},
+	post: function() {
+		var args = arguments;
+
+		return retry(function() {
+			return post.apply(this, args);
+		}, config.api.retries);
+	}
 };

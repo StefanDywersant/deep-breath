@@ -48,6 +48,39 @@ var all = function() {
 };
 
 
+var byId = function(id) {
+	return all().then(function(stations) {
+		return stations.reduce(function(found, station) {
+			if (found)
+				return found;
+
+			return station.id == id ? station : null;
+		}, null);
+	});
+};
+
+
+var byChannelId = function(channelId) {
+	return all().then(function(stations) {
+		return stations.reduce(function(found, station) {
+			if (found)
+				return found;
+
+			var foundChannels = station.channels.filter(function(channel) {
+				return channel.id == channelId;
+			});
+
+			if (foundChannels.length)
+				return station;
+
+			return null;
+		}, null);
+	});
+};
+
+
 module.exports = {
-	all: all
+	all: all,
+	byId: byId,
+	byChannelId: byChannelId
 };

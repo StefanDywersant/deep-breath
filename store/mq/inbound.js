@@ -3,7 +3,10 @@ var config = require('config').store,
 	logger = require('../../service/logger'),
 	os = require('os'),
 	announce = require('../controller/announce'),
-	types = require('../../types/types.js');
+	measurement = require('../controller/measurement'),
+	fin_measurements = require('../controller/fin_measurements'),
+	types = require('../../types/types.js'),
+	q = require('q');
 
 
 var consumerTag = [
@@ -19,16 +22,29 @@ module.exports = rabbitmq.then(function(connection) {
 			try {
 				var envelope = JSON.parse(message.content.toString());
 
-				logger.silly('[mq:inbound] Received message: ', envelope);
+				logger.silly('[mq:inbound] Received message', envelope);
 
-				if (envelope.type == types.MQ.ANNOUNCE) {
-					announce(envelope.payload, envelope.datasource_code).done(function() {
-						channel.ack(message);
-					}, function(error) {
-						channel.nack(message, null, true)
-						logger.error('[mq:inbound] Error: ' + error.message, error.stack);
-					});
-				}
+				(function() {
+					switch (envelope.type) {
+						case types.MQ.ANNOUNCE:
+							return announce(envelope.payload, envelope.datasource_code);
+
+						case types.MQ.MEASUREMENT:
+							return measurement(envelope.payload);
+
+						case types.MQ.FIN_MEASUREMENTS:
+							return fin_measurements(envelope.payload, envelope.datasource_code);
+
+						default:
+							logger.error('[mq.inbound] Unknown message type %s', envelope.type);
+							return q(false);
+					}
+				})().done(function() {
+					channel.ack(message);
+				}, function(error) {
+					channel.nack(message, null, true)
+					logger.error('[mq:inbound] Error: ' + error.message, error.stack);
+				});
 			} catch (error) {
 				logger.error('[mq:inbound] Error: ', error.message);
 				channel.nack(message, null, true);

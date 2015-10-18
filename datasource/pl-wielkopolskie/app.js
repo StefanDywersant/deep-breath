@@ -4,10 +4,20 @@ var stations = require('./api/stations'),
 	config = require('config'),
 	outbound = require('./mq/outbound'),
 	logger = require('../../service/logger'),
-	types = require('../../types/types.js');
+	types = require('../../types/types.js'),
+	mqInbound = require('./mq/inbound'),
+	updates = require('./daemon/updates');
 
+if (process.env.NODE_ENV !== 'production')
+	require('longjohn');
 
 redis.init(config.datasource['pl-wielkopolskie'].redis);
+
+mqInbound.done(function() {
+	logger.info('[app] Initialized MQ inbound service');
+}, function(error) {
+	logger.error('[app] Error while initializing MQ inbound service: %s', error.message);
+});
 
 stations.all().then(function(stations) {
 	return outbound.send({
@@ -33,3 +43,5 @@ stations.all().then(function(stations) {
 }).fail(function(error) {
 	console.log(error.stack);
 });
+
+updates.init();

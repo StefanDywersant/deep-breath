@@ -3,22 +3,25 @@ var http = require('http'),
 	requests = require('./requests'),
 	logger = require('../../../service/logger'),
 	startDateFinder = require('../../../service/startdatefinder'),
-	redis = require('../../../service/redis');
+	stations = require('./stations');
 
 
-var DAY = 24 * 60 * 60 * 1000;
-
-
-var entitize = function(apiMeasurements) {
+var entitize = function(apiMeasurements, station) {
 	return apiMeasurements.series.map(function(serie) {
 		return {
-			paramId: serie.paramId,
-			values: serie.data.map(function(apiMeasurement) {
-				return {
-					date: new Date(parseInt(apiMeasurement[0]) * 1000),
-					value: parseFloat(apiMeasurement[1])
-				};
-			})
+			channel_id: station.channels.reduce(function(found, channel) {
+				if (found)
+					return found;
+
+				if (channel.param_id == serie.paramId)
+					return channel.id;
+
+				return null;
+			}, null),
+			values: serie.data.reduce(function(values, apiMeasurement) {
+				values[parseInt(apiMeasurement[0]) * 1000] = parseFloat(apiMeasurement[1]);
+				return values;
+			}, {})
 		};
 	});
 };
@@ -37,57 +40,39 @@ var formatDate = function(date) {
 };
 
 
-var byDate = function(date, station) {
-	var key = 'api:measurements:' + station.id + ':' + formatDate(date),
-		fetch = function() {
-			var query = {
-				query: JSON.stringify({
-					measType: 'Auto',
-					viewType: 'Station',
-					dateRange: 'Day',
-					date: formatDate(date),
-					viewTypeEntityId: '' + station.id,
-					channels: station.channels.map(function(channel) {
-						return channel.id;
-					})
-				})
-			};
+var byDate = function(date, channelIds, station) {
+	var query = {
+		query: JSON.stringify({
+			measType: 'Auto',
+			viewType: 'Station',
+			dateRange: 'Day',
+			date: formatDate(date),
+			viewTypeEntityId: '' + station.id,
+			channels: channelIds
+		})
+	};
 
-			return requests.post(
-				config.api.paths.measurements,
-				query
-			).then(function(data) {
-				return entitize(JSON.parse(data).data);
-			}).then(function(measurements) {
-				if (isEmpty(measurements))
-					return null;
+	return requests.post(
+		config.api.paths.measurements,
+		query
+	).then(function(data) {
+		return entitize(JSON.parse(data).data, station);
+	}).then(function(measurements) {
+		if (isEmpty(measurements)) {
+			logger.debug('[measurements:byDate] Measurements not found date=%s channelIds=[%s] station.id=%d', date.toString(), channelIds.join(','), station.id);
+			return null;
+		}
 
-				return measurements;
-			});
-		};
+		logger.debug('[measurements:byDate] Measurements found date=%s channelIds=[%s] station.id=%d', date.toString(), channelIds.join(','), station.id);
 
-	// caching rules
-	return redis.get(key).then(function(measurements) {
-		if (measurements)
-			return measurements;
-
-		return fetch().then(function(measurements) {
-			if (!measurements)
-				return measurements;
-
-			return redis.set(
-				key,
-				measurements,
-				config.measurements.cache_ttl
-			);
-		});
+		return measurements;
 	});
 };
 
 
 var isEmpty = function(measurements) {
 	return !measurements.reduce(function(notEmpty, measurement) {
-		if (measurement.values.length > 0)
+		if (Object.keys(measurement.values).length > 0)
 			notEmpty = true;
 
 		return notEmpty;
@@ -95,29 +80,24 @@ var isEmpty = function(measurements) {
 };
 
 
-var fromDate = function(date, station) {
+var startDate = function(date, channelIds, station) {
 	return startDateFinder(
 		function(date) {
-			return byDate(date, station).then(function(measurements) {
+			return byDate(date, channelIds, station).then(function(measurements) {
 				return !!measurements;
 			});
 		},
 		date,
 		config.measurements.start_date_epsilon
 	).then(function(startDate) {
-		var daysCount = Math.floor((Date.now() - startDate.getTime()) / (DAY)),
-			days = [];
+		logger.verbose('[measurements:startDate] Found start date %s for channelIds [%s]', startDate, channelIds.join(','));
 
-		for (var i = 0; i < daysCount; i++) {
-			days.push(new Date(startDate.getTime() + i * DAY));
-		}
-
-		console.log(days.length);
+		return startDate;
 	});
 };
 
 
 module.exports = {
 	byDate: byDate,
-	fromDate: fromDate
+	startDate: startDate
 };

@@ -1,6 +1,6 @@
-var config = require('config').datasource['pl-wielkopolskie'],
-	rabbitmq = require('../../../service/rabbitmq')(config.rabbitmq),
-	logger = require('../../../service/logger');
+var config = require('config').store,
+	rabbitmq = require('../../service/rabbitmq')(config.rabbitmq),
+	logger = require('../../service/logger');
 
 
 var initialized = rabbitmq.then(function(connection) {
@@ -16,11 +16,11 @@ var initialized = rabbitmq.then(function(connection) {
 });
 
 
-var send = function(message) {
+var send = function(message, target) {
 	return initialized.then(function(channel) {
 		return channel.publish(
 			config.rabbitmq.exchange,
-			'store',
+			target,
 			new Buffer(JSON.stringify(message))
 		);
 	}).then(function() {
