@@ -1,8 +1,8 @@
 var q = require('q'),
-	measurements = require('../api/measurements'),
-	mqOutbound = require('../mq/outbound'),
-	types = require('../../../types/types'),
-	stations = require('../api/stations');
+	measurements = require('../../api/measurements'),
+	mqOutbound = require('../outbound'),
+	types = require('../../../../types/types'),
+	stations = require('../../api/stations');
 
 var DAY = 24 * 60 * 60 * 1000;
 

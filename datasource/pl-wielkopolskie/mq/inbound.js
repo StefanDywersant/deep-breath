@@ -2,8 +2,8 @@ var config = require('config').datasource['pl-wielkopolskie'],
 	rabbitmq = require('../../../service/rabbitmq'),
 	logger = require('../../../service/logger'),
 	os = require('os'),
-	req_measurements = require('../controller/req_measurements'),
-	start_updates = require('../controller/start_updates'),
+	req_measurements = require('./handler/req_measurements'),
+	start_updates = require('./handler/start_updates'),
 	types = require('../../../types/types.js'),
 	q = require('q');
 

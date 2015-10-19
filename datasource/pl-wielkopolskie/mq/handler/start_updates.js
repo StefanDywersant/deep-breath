@@ -1,7 +1,7 @@
 var q = require('q'),
-	logger = require('../../../service/logger'),
-	channels = require('../api/channels'),
-	updates = require('../daemon/updates');
+	logger = require('../../../../service/logger'),
+	channels = require('../../api/channels'),
+	updates = require('../../daemon/updates');
 
 
 module.exports = function(payload) {
