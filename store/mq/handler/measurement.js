@@ -1,7 +1,7 @@
 var q = require('q'),
-	Measurements = require('../models/measurements'),
-	Channels = require('../models/channels'),
-	logger = require('../../service/logger');
+	Measurements = require('../../models/measurements'),
+	Channels = require('../../models/channels'),
+	logger = require('../../../service/logger');
 
 module.exports = function(payload) {
 	return q.all(payload.measurements.map(function(measurement) {

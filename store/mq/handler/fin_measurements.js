@@ -1,6 +1,6 @@
-var logger = require('../../service/logger'),
-	mqOutbound = require('../mq/outbound'),
-	types = require('../../types/types');
+var logger = require('../../../service/logger'),
+	mqOutbound = require('../outbound'),
+	types = require('../../../types/types');
 
 module.exports = function(payload, datasourceCode) {
 

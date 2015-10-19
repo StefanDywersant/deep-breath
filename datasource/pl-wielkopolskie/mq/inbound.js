@@ -1,5 +1,5 @@
 var config = require('config').datasource['pl-wielkopolskie'],
-	rabbitmq = require('../../../service/rabbitmq')(config.rabbitmq),
+	rabbitmq = require('../../../service/rabbitmq'),
 	logger = require('../../../service/logger'),
 	os = require('os'),
 	req_measurements = require('../controller/req_measurements'),
@@ -16,7 +16,7 @@ var consumerTag = [
 ].join(':');
 
 
-module.exports = rabbitmq.then(function(connection) {
+module.exports = rabbitmq(config.rabbitmq).then(function(connection) {
 	return connection.createChannel().then(function(channel) {
 		var receive = function(message) {
 			try {

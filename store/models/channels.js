@@ -3,6 +3,7 @@ var sequelize = require('../service/sequelize'),
 	Stations = require('./stations'),
 	Parameters = require('./parameters');
 
+
 var Channels = sequelize.define(
 	'channel',
 	{
@@ -44,6 +45,10 @@ Channels.findByDatasource = function(datasource) {
 
 Channels.findByCode = function(code) {
 	return this.findOne({where: {code: code}});
+};
+
+Channels.findByStation = function(station) {
+	return Channels.findAll({where: {station_uuid: station.uuid}});
 };
 
 module.exports = Channels;

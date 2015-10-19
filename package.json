@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.4.0",
+    "body-parser": "^1.14.1",
     "config": "^1.16.0",
+    "express": "^4.13.3",
     "js-yaml": "^3.4.2",
     "longjohn": "^0.2.9",
     "pg": "^4.4.2",
@@ -20,6 +22,7 @@
     "qthrottle": "^0.2.1",
     "redis": "^2.1.0",
     "sequelize": "^3.11.0",
-    "winston": "^1.1.0"
+    "winston": "^1.1.0",
+    "winston-request-logger": "^1.0.7"
   }
 }

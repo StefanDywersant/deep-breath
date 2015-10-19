@@ -1,7 +1,8 @@
 var sequelize = require('../service/sequelize'),
 	Sequelize = require('sequelize'),
 	Countries = require('./countries'),
-	Datasources = require('./datasources');
+	Datasources = require('./datasources'),
+	config = require('config').store;
 
 var Stations = sequelize.define(
 	'station',
@@ -22,21 +23,9 @@ var Stations = sequelize.define(
 		address: {
 			type: Sequelize.JSON
 		},
-		longitude: {
-			type: Sequelize.FLOAT,
-			allowNull: false,
-			validate: {
-				min: -180,
-				max: 180
-			}
-		},
-		latitude: {
-			type: Sequelize.FLOAT,
-			allowNull: false,
-			validate: {
-				min: -90,
-				max: 90
-			}
+		location: {
+			type: Sequelize.GEOMETRY('POINT'),
+			allowNull: false
 		}
 	},
 	{
@@ -52,6 +41,34 @@ Stations.belongsTo(Datasources, {foreignKey: { allowNull: false }, onDelete: 'RE
 
 Stations.findByDatasource = function(datasource) {
 	return this.findAll({where: {datasource_uuid: datasource.uuid}});
+};
+
+Stations.findNearest = function(location, distance, limit) {
+	limit = limit ? limit : config.stations.nearest.limit;
+	distance = distance ? distance : config.stations.nearest.distance;
+
+	return sequelize.query(
+		'SELECT * ' +
+			'FROM stations ' +
+			'WHERE ST_Distance_Sphere(location, st_makepoint(?, ?)) < ? ' +
+			'ORDER BY location <-> st_setsrid(st_makepoint(?, ?), 4326) ' +
+			'LIMIT ?',
+		{
+			replacements: [
+				location.longitude,
+				location.latitude,
+				distance,
+				location.longitude,
+				location.latitude,
+				limit
+			],
+			model: Stations
+		}
+	);
+};
+
+Stations.findByUUID = function(uuid) {
+	return Stations.findOne({where: {uuid: uuid}});
 };
 
 module.exports = Stations;

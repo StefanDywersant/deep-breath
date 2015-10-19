@@ -12,6 +12,13 @@ store:
     queue: 'store'
   database:
     url: 'postgres://maciaszk@localhost:5432/deepbreath'
+  webserver:
+    port: 8080
+    childs: 2
+  stations:
+    nearest:
+      limit: 10
+      distance: 50000
 
 datasource:
   pl-wielkopolskie:

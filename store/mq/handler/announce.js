@@ -1,13 +1,13 @@
-var Stations = require('../models/stations'),
-	Countries = require('../models/countries'),
-	Datasources = require('../models/datasources'),
-	Parameters = require('../models/parameters'),
-	Channels = require('../models/channels'),
-	Measurements = require('../models/measurements'),
+var Stations = require('../../models/stations'),
+	Countries = require('../../models/countries'),
+	Datasources = require('../../models/datasources'),
+	Parameters = require('../../models/parameters'),
+	Channels = require('../../models/channels'),
+	Measurements = require('../../models/measurements'),
 	q = require('q'),
-	logger = require('../../service/logger'),
-	mqOutbound = require('../mq/outbound'),
-	types = require('../../types/types');
+	logger = require('../../../service/logger'),
+	mqOutbound = require('../outbound'),
+	types = require('../../../types/types');
 
 
 var deleteChannels = function(announcedChannels, existingChannels) {
@@ -87,7 +87,14 @@ var upsertStations = function(announcedStations, datasource) {
 				longitude: announcedStation.longitude,
 				latitude: announcedStation.latitude,
 				country_uuid: country.uuid,
-				datasource_uuid: datasource.uuid
+				datasource_uuid: datasource.uuid,
+				location: {
+					type: 'Point',
+					coordinates: [
+						announcedStation.longitude,
+						announcedStation.latitude
+					]
+				}
 			};
 
 			return Stations.findOne({

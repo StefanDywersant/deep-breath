@@ -31,7 +31,7 @@ var update = function(mapEntry) {
 			}
 		});
 	}).fail(function(error) {
-		logger.error('Error while updating channel.id=%d: %s', channel.id, error.message);
+		logger.error('Error while updating channels: %s', error.message);
 	});
 };
 
