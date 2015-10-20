@@ -54,4 +54,17 @@ Measurements.findByTimestamp = function(timestamp, channel) {
 	});
 };
 
+Measurements.findByBeginEnd = function(begin, end, channel) {
+	return this.findAll({
+		where: {
+			channel_uuid: channel.uuid,
+			timestamp: {
+				$gte: begin,
+				$lte: end
+			}
+		},
+		order: [['timestamp', 'DESC']]
+	});
+};
+
 module.exports = Measurements;

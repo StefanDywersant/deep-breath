@@ -51,4 +51,8 @@ Channels.findByStation = function(station) {
 	return Channels.findAll({where: {station_uuid: station.uuid}});
 };
 
+Channels.findByUUID = function(uuid) {
+	return Channels.findOne({where: {uuid: uuid}});
+};
+
 module.exports = Channels;
