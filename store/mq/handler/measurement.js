@@ -3,8 +3,8 @@ var q = require('q'),
 	Channels = require('../../models/channels'),
 	logger = require('../../../service/logger');
 
-module.exports = function(payload) {
-	return q.all(payload.measurements.map(function(measurement) {
+module.exports = function(measurements) {
+	return q.all(measurements.map(function(measurement) {
 		return Channels.findByCode(measurement.channel_code).then(function(channel) {
 			return q.all(Object.keys(measurement.values).map(function(timestamp) {
 				return Measurements.findByTimestamp(

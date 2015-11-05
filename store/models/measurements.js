@@ -54,7 +54,7 @@ Measurements.findByTimestamp = function(timestamp, channel) {
 	});
 };
 
-Measurements.findByBeginEnd = function(begin, end, channel) {
+Measurements.findByRange = function(begin, end, channel) {
 	return this.findAll({
 		where: {
 			channel_uuid: channel.uuid,
@@ -64,6 +64,16 @@ Measurements.findByBeginEnd = function(begin, end, channel) {
 			}
 		},
 		order: [['timestamp', 'DESC']]
+	});
+};
+
+Measurements.findLast = function(channel) {
+	return this.findAll({
+		where: {
+			channel_uuid: channel.uuid
+		},
+		order: [['timestamp', 'DESC']],
+		limit: 1
 	});
 };
 

@@ -84,15 +84,14 @@ var upsertStations = function(announcedStations, datasource) {
 				code: announcedStation.code,
 				name: announcedStation.name,
 				address: announcedStation.address,
-				longitude: announcedStation.longitude,
-				latitude: announcedStation.latitude,
 				country_uuid: country.uuid,
 				datasource_uuid: datasource.uuid,
+				flags: announcedStation.flags,
 				location: {
 					type: 'Point',
 					coordinates: [
-						announcedStation.longitude,
-						announcedStation.latitude
+						announcedStation.location.longitude,
+						announcedStation.location.latitude
 					]
 				}
 			};

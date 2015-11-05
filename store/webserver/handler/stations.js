@@ -1,6 +1,5 @@
 var router = require('express').Router(),
 	Stations = require('../../models/stations'),
-	Channels = require('../../models/channels'),
 	entitize = require('../entitize/station'),
 	q = require('q');
 
@@ -24,12 +23,12 @@ module.exports = function(app) {
 			req.params.distance,
 			req.params.limit
 		).then(function(stations) {
-				return q.all(stations.map(entitize));
-			}).done(function(stations) {
-				res.send(stations);
-			}, function(error) {
-				res.status(500).send(error.message);
-			});
+			return q.all(stations.map(entitize));
+		}).done(function(stations) {
+			res.send(stations);
+		}, function(error) {
+			res.status(500).send(error.message);
+		});
 	});
 
 	app.get('/stations/uuid/:uuid', function(req, res) {

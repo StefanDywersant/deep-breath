@@ -6,9 +6,7 @@ var http = require('http'),
 	exec = require('child_process').exec,
 	bodyParser = require('body-parser'),
 	stationsHandler = require('./handler/stations'),
-	channelsHandler = require('./handler/channels'),
-	measurementsHandler = require('./handler/measurements'),
-	config = require('config').store,
+	config = require('config').mobile,
 	logger = require('../../service/logger'),
 	winstonRequestLogger = require('winston-request-logger');
 
@@ -27,8 +25,6 @@ app.use(winstonRequestLogger.create(logger, {
 }));
 
 stationsHandler(app);
-channelsHandler(app);
-measurementsHandler(app);
 
 var instance = http.createServer(app);
 

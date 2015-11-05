@@ -7,7 +7,8 @@ var entitize = function(apiChannel) {
 		id: apiChannel.channel_id,
 		param_id: apiChannel.param_id,
 		unit_id: apiChannel.unit_id,
-		station_id: apiChannel.station_id
+		station_id: apiChannel.station_id,
+		method: apiChannel.method
 	};
 };
 

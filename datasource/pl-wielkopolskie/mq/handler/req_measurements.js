@@ -1,66 +1,67 @@
 var q = require('q'),
 	measurements = require('../../api/measurements'),
-	mqOutbound = require('../outbound'),
+	channels = require('../../api/channels'),
+	stations = require('../../api/stations'),
+	emitMeasurement = require('../emitter/measurement'),
+	emitFinMeasurements = require('../emitter/fin_measurements'),
 	types = require('../../../../types/types'),
-	stations = require('../../api/stations');
+	logger = require('../../../../service/logger');
 
-var DAY = 24 * 60 * 60 * 1000;
 
-var processDate = function(date, channelId, station) {
-	return measurements.byDate(
-		date,
-		[channelId],
-		station
-	).then(function(measurements) {
-		if (!measurements)
-			return false;
-
-		return mqOutbound.send({
-			type: types.MQ.MEASUREMENT,
-			datasource_code: 'pl-wielkopolskie',
-			payload: {
-				measurements: measurements.map(function(measurement) {
-					return {
-						channel_code: 'pl-wielkopolskie:' + station.id + ':' + measurement.channel_id,
-						values: measurement.values
-					};
-				})
-			}
-		});
-	});
+var addDay = function(date) {
+	date.setDate(date.getDate() + 1);
+	return date;
 };
 
+
+var addMonth = function(date) {
+	date.setMonth(date.getMonth() + 1);
+	return date;
+};
+
+
 module.exports = function(payload) {
-	var channelId = parseInt(payload.channel_code.split(':')[2]);
+	var channelId = parseInt(payload.channel_code.split(':')[2]),
+		since = new Date(payload.timestamp);
 
-	return stations.byChannelId(channelId).then(function(station) {
-		return measurements.startDate(
-			new Date(payload.timestamp),
-			[channelId],
-			station
-		).then(function(startDate) {
-			var step = function(date) {
-				return processDate(
-					date,
-					channelId,
-					station
-				).then(function() {
-					if (date.getTime() > Date.now())
-						return true;
+	return channels.byId(channelId).then(function(channel) {
+		return stations.byChannel(channel).then(function(station) {
+			return measurements.startDate(
+				since,
+				channel,
+				station
+			).then(function(startDate) {
+				var step = function(date) {
+					return emitMeasurement(
+						date,
+						[channel],
+						station
+					).then(function() {
+						if (date.getTime() > Date.now())
+							return true;
 
-					return step(new Date(date.getTime() + DAY));
-				});
-			};
+						return step(
+							channel.method == types.STATION.METHOD.MANUAL
+								? addMonth(date)
+								: addDay(date)
+						);
+					});
+				};
 
-			return step(startDate);
-		});
-	}).then(function() {
-		return mqOutbound.send({
-			type: types.MQ.FIN_MEASUREMENTS,
-			datasource_code: 'pl-wielkopolskie',
-			payload: {
-				channel_code: payload.channel_code
-			}
+				if (!startDate) {
+					logger.warn(
+						'[mq.handler.req_measurements] Channel %d of station %d has no new measurements since %s',
+						channel.id,
+						station.id,
+						since
+					);
+					return null;
+				}
+
+				return step(startDate);
+			}).then(function() {
+				return emitFinMeasurements(station, channel);
+			});
 		});
 	});
 };

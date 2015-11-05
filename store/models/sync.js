@@ -13,12 +13,12 @@ module.exports = function() {
 	sequelize.sync().done(function() {
 		logger.debug('[sequelize] Models synchronized');
 	}, function(error) {
-		logger.error('[sequelize] Error synchronising models: ' + error.message);
+		logger.error('[sequelize] Error synchronizing models: ' + error.message);
 	});
 };
 
-
-/*setTimeout(function() {
+/*
+setTimeout(function() {
 	Measurements.drop().then(function() {
 		return Channels.drop();
 	}).then(function() {
@@ -144,5 +144,43 @@ module.exports = function() {
 				unit_uuid: unit.uuid
 			});
 		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f ng/m³'
+		}).then(function(unit) {
+			return q.all([
+				Parameters.create({
+					name: 'Benzo(a)piren w PM₁₀',
+					code: 'pm10_bap',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Arsen w PM₁₀',
+					code: 'pm10_as',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Kadm w PM₁₀',
+					code: 'pm10_cd',
+					unit_uuid: unit.uuid
+				}),
+				Parameters.create({
+					name: 'Nikiel w PM₁₀',
+					code: 'pm10_ni',
+					unit_uuid: unit.uuid
+				})
+			]);
+		});
+	}).then(function() {
+		return Units.create({
+			format: '%.2f ppb'
+		}).then(function(unit) {
+			return Parameters.create({
+				name: 'Ołów',
+				code: 'pb',
+				unit_uuid: unit.uuid
+			});
+		});
 	});
-}, 2000);*/
+}, 2000);
+*/

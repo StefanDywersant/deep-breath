@@ -13,12 +13,44 @@ store:
   database:
     url: 'postgres://maciaszk@localhost:5432/deepbreath'
   webserver:
-    port: 8080
+    port: 8081
     childs: 2
   stations:
     nearest:
       limit: 10
-      distance: 50000
+      distance: 300000
+
+mobile:
+  webserver:
+    port: 8080
+    childs: 2
+
+  store:
+    host: 'localhost'
+    port: 8081
+
+  parameter_groups:
+    - code: 'air_quality'
+      name: 'Jakość powietrza'
+      parameters:
+        - co
+        - pm10
+        - pm2.5
+        - no
+        - no2
+        - nox
+        - so2
+        - o3
+        - bzn
+
+    - code: 'weather'
+      name: 'Dane pogodowe'
+      parameters:
+        - temp
+        - humid
+        - press
+        - ws
+        - wd
 
 datasource:
   pl-wielkopolskie:
@@ -28,7 +60,7 @@ datasource:
         stations: '/'
         configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
         measurements: '/dane-pomiarowe/pobierz'
-      ratelimit: 1000
+      ratelimit: 250
       retries: 10
 
     rabbitmq:

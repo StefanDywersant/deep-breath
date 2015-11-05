@@ -1,10 +1,67 @@
 var requests = require('./requests'),
 	config = require('config').datasource['pl-wielkopolskie'],
 	redis = require('../../../service/redis'),
-	qthrottle = require('qthrottle')(1);
+	qthrottle = require('qthrottle')(1),
+	q = require('q'),
+	types = require('../../../types/types');
 
 
 var CONFIGURATION_CACHE_KEY = 'api:configuration';
+
+
+var merge = function(key, a, b) {
+	return b.reduce(function(merged, b) {
+		var found = merged.filter(function(m) {
+			return m[key] == b[key];
+		});
+
+		if (!found.length)
+			merged.push(b);
+
+		return merged;
+	}, a.slice(0));
+};
+
+
+var fetch = function() {
+	return q.all([
+			requests.post(
+				config.api.paths.configuration,
+				{measType: 'Auto'}
+			),
+			requests.post(
+				config.api.paths.configuration,
+				{measType: 'Manual'}
+			)
+		]).spread(function(auto, manual) {
+		auto = JSON.parse(auto);
+		manual = JSON.parse(manual);
+
+		return {
+			params: merge(
+				'id',
+				auto.config.params,
+				manual.config.params
+			),
+			channels: merge(
+				'channel_id',
+				auto.config.channels.map(function(channel) {
+					channel.method = types.STATION.METHOD.AUTOMATIC;
+					return channel;
+				}),
+				manual.config.channels.map(function(channel) {
+					channel.method = types.STATION.METHOD.MANUAL;
+					return channel;
+				})
+			),
+			stations: merge(
+				'id',
+				auto.config.stations,
+				manual.config.stations
+			)
+		}
+	});
+};
 
 
 var get = function() {
@@ -12,12 +69,7 @@ var get = function() {
 		if (result)
 			return result;
 
-		return requests.post(
-			config.api.paths.configuration,
-			{measType: 'Auto'}
-		).then(function(data) {
-			return JSON.parse(data).config;
-		}).then(function(configuration) {
+		return fetch().then(function(configuration) {
 			return redis.set(
 				CONFIGURATION_CACHE_KEY,
 				configuration,

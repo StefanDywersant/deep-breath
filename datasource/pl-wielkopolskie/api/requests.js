@@ -37,7 +37,7 @@ var get = function(path) {
 		});
 
 		request.on('error', function(error) {
-			logger.error('[requests:get] Error while processing http://%s%s: %s', host, path, error);
+			logger.error('[api.requests:get] Error while processing http://%s%s: %s', host, path, error);
 			deferred.reject(error);
 		});
 

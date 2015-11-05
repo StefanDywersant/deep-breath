@@ -26,6 +26,10 @@ var Stations = sequelize.define(
 		location: {
 			type: Sequelize.GEOMETRY('POINT'),
 			allowNull: false
+		},
+		flags: {
+			type: Sequelize.INTEGER,
+			allowNull: false
 		}
 	},
 	{
