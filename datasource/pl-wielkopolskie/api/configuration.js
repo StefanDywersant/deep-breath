@@ -46,11 +46,11 @@ var fetch = function() {
 			channels: merge(
 				'channel_id',
 				auto.config.channels.map(function(channel) {
-					channel.method = types.STATION.METHOD.AUTOMATIC;
+					channel.flags = types.STATION.METHOD.AUTOMATIC;
 					return channel;
 				}),
 				manual.config.channels.map(function(channel) {
-					channel.method = types.STATION.METHOD.MANUAL;
+					channel.flags = types.STATION.METHOD.MANUAL;
 					return channel;
 				})
 			),

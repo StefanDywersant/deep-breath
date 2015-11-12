@@ -8,6 +8,7 @@ module.exports = function(station) {
 		location: {
 			longitude: station.location.coordinates[0],
 			latitude: station.location.coordinates[1]
-		}
+		},
+		flags: station.flags
 	});
 };

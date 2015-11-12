@@ -33,7 +33,8 @@ var upsertChannels = function(announcedChannels, station) {
 			var dbChannel = {
 				code: announcedChannel.code,
 				station_uuid: station.uuid,
-				parameter_uuid: parameter.uuid
+				parameter_uuid: parameter.uuid,
+				flags: announcedChannel.flags
 			};
 
 			return Channels.findOne({
@@ -133,7 +134,7 @@ var reqMeasurements = function(datasource) {
 		datasource
 	).then(function(channels) {
 		return q.all(channels.map(function(channel) {
-			return Measurements.maxTimestamp(
+			return Measurements.maxEndTime(
 				channel
 			).then(function(timestamp) {
 				return mqOutbound.send(

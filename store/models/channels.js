@@ -15,6 +15,10 @@ var Channels = sequelize.define(
 		code: {
 			type: Sequelize.STRING(32),
 			allowNull: false
+		},
+		flags: {
+			type: Sequelize.INTEGER,
+			allowNull: false
 		}
 	},
 	{

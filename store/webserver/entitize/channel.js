@@ -9,6 +9,7 @@ module.exports = function(channel) {
 					uuid: parameter.uuid,
 					name: parameter.name,
 					code: parameter.code,
+					flags: channel.flags,
 					unit: {
 						uuid: unit.uuid,
 						format: unit.format

@@ -31,9 +31,7 @@ module.exports = function(app) {
 
 	app.get('/measurements/:uuids/last', function(req, res) {
 		q.all(
-			req.params.uuids
-				.split(',')
-				.map(Channels.findByUUID)
+			req.params.uuids.split(',').map(Channels.findByUUID)
 		).then(function(channels) {
 			return q.all(channels.map(function(channel) {
 				return Measurements.findLast(channel).then(function(measurements) {

@@ -6,26 +6,27 @@ var q = require('q'),
 module.exports = function(measurements) {
 	return q.all(measurements.map(function(measurement) {
 		return Channels.findByCode(measurement.channel_code).then(function(channel) {
-			return q.all(Object.keys(measurement.values).map(function(timestamp) {
-				return Measurements.findByTimestamp(
-					new Date(parseInt(timestamp)),
+			return q.all(measurement.values.map(function(value) {
+				return Measurements.findByEndTime(
+					new Date(parseInt(value.end)),
 					channel
 				).then(function(existingMeasurement) {
 					if (!existingMeasurement) {
 						return Measurements.create({
-							timestamp: new Date(parseInt(timestamp)),
-							value: measurement.values[timestamp],
+							begin: new Date(parseInt(value.begin)),
+							end: new Date(parseInt(value.end)),
+							value: value.value,
 							channel_uuid: channel.uuid
 						}).then(function(measurement) {
-							logger.silly('[measurement] Created measurement uuid=%s timestamp=%s', measurement.uuid, measurement.timestamp.toString());
+							logger.silly('[measurement] Created measurement uuid=%s timestamp=%s', measurement.uuid, measurement.end.toString());
 							return measurement;
 						});
 					}
 
 					return existingMeasurement.update({
-						value: measurement.values[timestamp]
+						value: value.value
 					}).then(function(measurement) {
-						logger.silly('[measurement] Updated measurement uuid=%s timestamp=%s', measurement.uuid, measurement.timestamp.toString());
+						logger.silly('[measurement] Updated measurement uuid=%s timestamp=%s', measurement.uuid, measurement.end.toString());
 						return measurement;
 					});
 				});

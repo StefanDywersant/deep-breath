@@ -18,10 +18,7 @@ module.exports = function(station) {
 				}, null);
 
 				if (measurement) {
-					channel.last_measurement = {
-						timestamp: parseInt(Object.keys(measurement.measurements)[0]),
-						value: measurement.measurements[Object.keys(measurement.measurements)[0]]
-					}
+					channel.last_measurement = measurement.measurements[0]
 				}
 
 				return channel;

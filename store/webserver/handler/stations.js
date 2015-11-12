@@ -1,5 +1,4 @@
-var router = require('express').Router(),
-	Stations = require('../../models/stations'),
+var Stations = require('../../models/stations'),
 	entitize = require('../entitize/station'),
 	q = require('q');
 

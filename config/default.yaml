@@ -10,6 +10,7 @@ store:
     url: 'amqp://localhost'
     exchange: 'deepbreath'
     queue: 'store'
+    prefetch: 10
   database:
     url: 'postgres://maciaszk@localhost:5432/deepbreath'
   webserver:
@@ -35,6 +36,10 @@ mobile:
       parameters:
         - co
         - pm10
+        - pm10_as
+        - pm10_bap
+        - pm10_cd
+        - pm10_ni
         - pm2.5
         - no
         - no2

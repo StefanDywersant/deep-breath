@@ -10,7 +10,11 @@ var Measurements = sequelize.define(
 			primaryKey: true,
 			defaultValue: Sequelize.UUIDV4
 		},
-		timestamp: {
+		begin: {
+			type: Sequelize.DATE,
+			allowNull: false
+		},
+		end: {
 			type: Sequelize.DATE,
 			allowNull: false
 		},
@@ -26,7 +30,7 @@ var Measurements = sequelize.define(
 		indexes: [
 			{
 				unique: true,
-				fields: ['timestamp', 'channel_uuid']
+				fields: ['channel_uuid', 'end', 'begin']
 			}
 		]
 	}
@@ -34,9 +38,9 @@ var Measurements = sequelize.define(
 
 Measurements.belongsTo(Channels, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
 
-Measurements.maxTimestamp = function(channel) {
+Measurements.maxEndTime = function(channel) {
 	return this.max(
-		'timestamp',
+		'end',
 		{
 			where: {
 				channel_uuid: channel.uuid
@@ -45,10 +49,10 @@ Measurements.maxTimestamp = function(channel) {
 	);
 };
 
-Measurements.findByTimestamp = function(timestamp, channel) {
+Measurements.findByEndTime = function(end, channel) {
 	return this.findOne({
 		where: {
-			timestamp: timestamp,
+			end: end,
 			channel_uuid: channel.uuid
 		}
 	});
@@ -58,12 +62,14 @@ Measurements.findByRange = function(begin, end, channel) {
 	return this.findAll({
 		where: {
 			channel_uuid: channel.uuid,
-			timestamp: {
-				$gte: begin,
+			begin: {
+				$gt: begin
+			},
+			end: {
 				$lte: end
 			}
 		},
-		order: [['timestamp', 'DESC']]
+		order: [['end', 'DESC']]
 	});
 };
 
@@ -72,7 +78,7 @@ Measurements.findLast = function(channel) {
 		where: {
 			channel_uuid: channel.uuid
 		},
-		order: [['timestamp', 'DESC']],
+		order: [['end', 'DESC']],
 		limit: 1
 	});
 };

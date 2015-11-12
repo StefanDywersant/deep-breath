@@ -57,26 +57,28 @@ var init = function() {
 				'topic',
 				{durable: true}
 			).then(function() {
-					return channel.assertQueue(config.rabbitmq.queue);
-				}).then(function(queue) {
-					return channel.bindQueue(
-							queue.queue,
-							config.rabbitmq.exchange,
-							'store'
-						).then(function() {
-							logger.info('[mq.inbound] Setting consumer tag to: %s', consumerTag);
+				return channel.prefetch(config.rabbitmq.prefetch);
+			}).then(function() {
+				return channel.assertQueue(config.rabbitmq.queue);
+			}).then(function(queue) {
+				return channel.bindQueue(
+					queue.queue,
+					config.rabbitmq.exchange,
+					'store'
+				).then(function() {
+					logger.info('[mq.inbound] Setting consumer tag to: %s', consumerTag);
 
-							// start consuming messages from queue
-							return channel.consume(
-								queue.queue,
-								receive,
-								{
-									noAck: false,
-									consumerTag: consumerTag
-								}
-							);
-						});
+					// start consuming messages from queue
+					return channel.consume(
+						queue.queue,
+						receive,
+						{
+							noAck: false,
+							consumerTag: consumerTag
+						}
+					);
 				});
+			});
 		}).then(function() {
 			logger.info('[mq.inbound] Initialized MQ inbound service');
 			return true;

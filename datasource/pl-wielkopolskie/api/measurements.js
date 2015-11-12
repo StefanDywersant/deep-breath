@@ -8,25 +8,39 @@ var http = require('http'),
 	q = require('q');
 
 
-var MEASUREMENTS_BEGIN = new Date('01/01/2004');
+var MEASUREMENTS_BEGIN = new Date('01/01/2000'),
+	HOUR = 60 * 60 * 1000,
+	DAY = 24 * HOUR;
 
 
 var entitize = function(apiMeasurements) {
 	return apiMeasurements.series.map(function(serie) {
+		var channel = apiMeasurements.channels.reduce(function(found, channel) {
+			if (found)
+				return found;
+
+			if (channel.param_id == serie.paramId)
+				return channel;
+
+			return null;
+		}, null);
+
+		if (!channel)
+			throw new Error('Channel for param_id=%s not found', serie.paramId);
+
 		return {
-			channel_id: apiMeasurements.channels.reduce(function(found, channel) {
-				if (found)
-					return found;
+			channel_id: channel.id,
+			values: serie.data.map(function(apiMeasurement) {
+				var begin = channel.flags & types.STATION.METHOD.AUTOMATIC
+					? parseInt(apiMeasurement[0]) * 1000 - HOUR
+					: parseInt(apiMeasurement[0]) * 1000 - DAY;
 
-				if (channel.param_id == serie.paramId)
-					return channel.id;
-
-				return null;
-			}, null),
-			values: serie.data.reduce(function(values, apiMeasurement) {
-				values[parseInt(apiMeasurement[0]) * 1000] = parseFloat(apiMeasurement[1]);
-					return values;
-			}, {})
+				return {
+					begin: begin,
+					end: parseInt(apiMeasurement[0]) * 1000,
+					value: parseFloat(apiMeasurement[1])
+				};
+			})
 		};
 	});
 };
@@ -106,10 +120,10 @@ var fetchManual = function(date, channels, station) {
 
 var byDate = function(date, channels, station) {
 	var automaticChannels = channels.filter(function(channel) {
-			return channel.method == types.STATION.METHOD.AUTOMATIC;
+			return channel.flags == types.STATION.METHOD.AUTOMATIC;
 		}),
 		manualChannels = channels.filter(function(channel) {
-			return channel.method == types.STATION.METHOD.MANUAL;
+			return channel.flags == types.STATION.METHOD.MANUAL;
 		});
 
 	var queue = [];
@@ -159,11 +173,11 @@ var startDate = function(date, channel, station) {
 		date = MEASUREMENTS_BEGIN;
 
 	var find = function() {
-		if ((channel.method & types.STATION.METHOD.AUTOMATIC)) {
+		if ((channel.flags & types.STATION.METHOD.AUTOMATIC)) {
 			return startDateFinder.heuristic(
 				function(date) {
 					return byDate(date, [channel], station).then(function(measurements) {
-						return !!measurements;
+						return !!measurements.length;
 					});
 				},
 				date,
@@ -171,11 +185,11 @@ var startDate = function(date, channel, station) {
 			);
 		}
 
-		if ((channel.method & types.STATION.METHOD.MANUAL)) {
+		if ((channel.flags & types.STATION.METHOD.MANUAL)) {
 			return startDateFinder.accurate(
 				function(date) {
 					return byDate(date, [channel], station).then(function(measurements) {
-						return !!measurements;
+						return !!measurements.length;
 					});
 				},
 				date,
@@ -183,7 +197,7 @@ var startDate = function(date, channel, station) {
 			);
 		}
 
-		throw new Error('Unknown measurements method: ' + channel.method);
+		throw new Error('Unknown measurements method: ' + (channel.flags & types.STATION.METHOD._MASK));
 	};
 
 	return find().then(function(startDate) {
