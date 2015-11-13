@@ -1,0 +1,19 @@
+datasource:
+  pl-wielkopolskie:
+    redis:
+      host: 'localhost'
+      port: 6379
+      prefix: 'deep-breath:tst:pl-wielkopolskie:'
+
+store:
+  webserver:
+    port: 8091
+
+mobile:
+  webserver:
+    port: 8090
+
+  store:
+    host: 'localhost'
+    port: 8091
+

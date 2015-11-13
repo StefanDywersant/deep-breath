@@ -9,6 +9,9 @@ var redis = require('../../service/redis'),
 if (process.env.NODE_ENV !== 'production')
 	require('longjohn');
 
+// setup node environment
+process.env.NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
+
 redis.init(config.redis);
 
 mqInbound()

@@ -5,6 +5,10 @@ var logger = require('../service/logger'),
 	config = require('config').mobile;
 
 
+// setup node environment
+process.env.NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
+
+
 var childsNo = function() {
 	return config.webserver.childs == 'auto'
 		? os.cpus().length
