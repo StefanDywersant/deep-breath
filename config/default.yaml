@@ -65,7 +65,7 @@ datasource:
         stations: '/'
         configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
         measurements: '/dane-pomiarowe/pobierz'
-      ratelimit: 250
+      ratelimit: 500
       retries: 10
 
     rabbitmq:
