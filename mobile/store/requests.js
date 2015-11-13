@@ -6,7 +6,7 @@ var http = require('http'),
 
 var get = function(path) {
 	var deferred = q.defer(),
-		host = config.store.host,
+		host = config.store.hostname,
 		port = config.store.port,
 		startTime = Date.now();
 

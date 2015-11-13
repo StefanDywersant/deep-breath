@@ -15,6 +15,7 @@ store:
     url: '' # set in local.yaml
   webserver:
     port: 8081 # overwritten in environment specific file
+    hostname: 'localhost' # overwritten in environment specific file
     childs: 2
   stations:
     nearest:
@@ -24,10 +25,11 @@ store:
 mobile:
   webserver:
     port: 8080 # overwritten in environment specific file
+    hostname: 'localhost' # overwritten in environment specific file
     childs: 2
 
   store:
-    host: 'localhost'
+    hostname: 'localhost'
     port: 8081 # overwritten in environment specific file
 
   parameter_groups:

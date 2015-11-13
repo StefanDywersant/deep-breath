@@ -8,12 +8,14 @@ datasource:
 store:
   webserver:
     port: 8081
+    hostname: 'localhost'
 
 mobile:
   webserver:
     port: 8080
+    hostname: 'localhost'
 
   store:
-    host: 'localhost'
+    hostname: 'localhost'
     port: 8081
 
