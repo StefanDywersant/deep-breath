@@ -17,6 +17,8 @@ var childsNo = function() {
 };
 
 if (cluster.isMaster) {
+	process.title = 'deep-breath-store: master';
+
 	// spawn given number of children processes
 	for (var i = 0; i < childsNo(); i++) {
 		cluster.fork();
@@ -28,6 +30,8 @@ if (cluster.isMaster) {
 		logger.error('[app] Error while initializing MQ process: %s', error.message);
 	});
 } else {
+	process.title = 'deep-breath-store: webserver';
+
 	webserver.init().done(function() {
 		logger.info('[app] Webserver process initialised: %d', process.pid)
 	}, function(error) {

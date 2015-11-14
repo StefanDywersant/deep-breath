@@ -16,14 +16,14 @@ var childsNo = function() {
 };
 
 if (cluster.isMaster) {
-	process.title = 'deep-breath: mobile, master';
+	process.title = 'deep-breath-mobile: master';
 
 	// spawn given number of children processes
 	for (var i = 0; i < childsNo(); i++) {
 		cluster.fork();
 	}
 } else {
-	process.title = 'deep-breath: mobile, webserver';
+	process.title = 'deep-breath-mobile: webserver';
 
 	webserver.init().done(function() {
 		logger.info('[app] Webserver process initialised: %d', process.pid)

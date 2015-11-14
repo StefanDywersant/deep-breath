@@ -30,13 +30,17 @@ var Measurements = sequelize.define(
 		indexes: [
 			{
 				unique: true,
-				fields: ['channel_uuid', 'end', 'begin']
+				fields: ['channel_uuid', 'begin']
+			},
+			{
+				unique: true,
+				fields: ['channel_uuid', 'end']
 			}
 		]
 	}
 );
 
-Measurements.belongsTo(Channels, {foreignKey: { allowNull: false }, onDelete: 'RESTRICT'});
+Measurements.belongsTo(Channels, {foreignKey: {allowNull: false}, onDelete: 'RESTRICT'});
 
 Measurements.maxEndTime = function(channel) {
 	return this.max(

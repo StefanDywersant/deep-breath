@@ -12,6 +12,8 @@ if (process.env.NODE_ENV !== 'production')
 // setup node environment
 process.env.NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
 
+process.title = 'deep-breath-datasource: pl-wielkopolskie';
+
 redis.init(config.redis);
 
 mqInbound()

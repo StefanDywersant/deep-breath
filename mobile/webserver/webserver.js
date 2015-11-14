@@ -3,7 +3,6 @@
 var http = require('http'),
 	q = require('q'),
 	express = require('express'),
-	exec = require('child_process').exec,
 	bodyParser = require('body-parser'),
 	stationsHandler = require('./handler/stations'),
 	config = require('config').mobile,
