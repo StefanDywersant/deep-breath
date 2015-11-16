@@ -32,7 +32,9 @@ module.exports = function(station) {
 			return station;
 		});
 	}).then(function(station) {
-		var channelValues = station.channels.map(function(channel) {
+		var channelValues = station.channels.filter(function(channel) {
+			return !!channel.last_measurement;
+		}).map(function(channel) {
 			return {
 				channel_uuid: channel.uuid,
 				value: channel.last_measurement.value
