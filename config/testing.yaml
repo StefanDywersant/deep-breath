@@ -19,3 +19,10 @@ mobile:
     hostname: 'localhost'
     port: 8091
 
+aqi:
+  webserver:
+    port: 8092
+    hostname: 'localhost'
+  store:
+    hostname: 'localhost'
+    port: 8091

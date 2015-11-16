@@ -59,6 +59,15 @@ mobile:
         - ws
         - wd
 
+aqi:
+  webserver:
+    port: 8082 # overwritten in environment specific file
+    hostname: 'localhost' # overwritten in environment specific file
+    childs: 2
+  store:
+    hostname: 'localhost'
+    port: 8081 # overwritten in environment specific file
+
 datasource:
   pl-wielkopolskie:
     api:

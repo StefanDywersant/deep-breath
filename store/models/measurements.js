@@ -87,4 +87,22 @@ Measurements.findLast = function(channel) {
 	});
 };
 
+Measurements.averageByRange = function(begin, end, channel) {
+	return this.aggregate(
+		'value',
+		'avg',
+		{
+			where: {
+				channel_uuid: channel.uuid,
+				end: {
+					$gte: begin
+				},
+				begin: {
+					$lte: end
+				}
+			}
+		}
+	);
+};
+
 module.exports = Measurements;
