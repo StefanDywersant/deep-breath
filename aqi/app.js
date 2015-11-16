@@ -4,9 +4,6 @@ var logger = require('../service/logger'),
 	os = require('os'),
 	config = require('config').aqi;
 
-var index = require('./engine/index'),
-		stations = require('./store/stations');
-
 // setup node environment
 process.env.NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
 

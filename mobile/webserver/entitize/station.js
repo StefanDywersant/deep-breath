@@ -1,8 +1,8 @@
-var channels = require('../../store/channels'),
-	measurements = require('../../store/measurements'),
+var channels = require('../../../service/store/channels'),
+	measurements = require('../../../service/store/measurements'),
+	aqi = require('../../../service/aqi'),
 	config = require('config').mobile,
-	q = require('q'),
-	aqi = require('../../../service/aqi');
+	q = require('q');
 
 module.exports = function(station) {
 	return channels.byStation(station).then(function(channels) {

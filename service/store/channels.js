@@ -1,4 +1,5 @@
-var requests = require('./requests');
+var config = require('config'),
+	requests = require('../requests')({hostname: config.store.webserver.hostname, port: config.store.webserver.port});
 
 
 var byUUID = function(uuid) {

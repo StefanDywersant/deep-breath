@@ -28,10 +28,6 @@ mobile:
     hostname: 'localhost' # overwritten in environment specific file
     childs: 2
 
-  store:
-    hostname: 'localhost'
-    port: 8081 # overwritten in environment specific file
-
   parameter_groups:
     - code: 'air_quality'
       name: 'Jakość powietrza'
@@ -64,9 +60,6 @@ aqi:
     port: 8082 # overwritten in environment specific file
     hostname: 'localhost' # overwritten in environment specific file
     childs: 2
-  store:
-    hostname: 'localhost'
-    port: 8081 # overwritten in environment specific file
 
 datasource:
   pl-wielkopolskie:

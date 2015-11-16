@@ -1,5 +1,4 @@
-var channels = require('../store/channels'),
-	measurements = require('../store/measurements'),
+var channels = require('../../service/store/channels'),
 	scale = require('../const/scale'),
 	q = require('q');
 

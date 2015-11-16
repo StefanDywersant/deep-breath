@@ -1,4 +1,4 @@
-var stationsStore = require('../../store/stations'),
+var stationsStore = require('../../../service/store/stations'),
 	entitize = require('../entitize/station'),
 	q = require('q');
 

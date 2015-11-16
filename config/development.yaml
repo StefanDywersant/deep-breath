@@ -15,14 +15,7 @@ mobile:
     port: 8080
     hostname: 'localhost'
 
-  store:
-    hostname: 'localhost'
-    port: 8081
-
 aqi:
   webserver:
     port: 8082
     hostname: 'localhost'
-  store:
-    hostname: 'localhost'
-    port: 8081
