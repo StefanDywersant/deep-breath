@@ -1,5 +1,4 @@
-var http = require('http'),
-	config = require('config').datasource['pl-wielkopolskie'],
+var config = require('config').datasource['pl-wielkopolskie'],
 	requests = require('./requests'),
 	logger = require('../../../service/logger'),
 	startDateFinder = require('../../../service/startdatefinder'),
@@ -173,31 +172,25 @@ var startDate = function(date, channel, station) {
 		date = MEASUREMENTS_BEGIN;
 
 	var find = function() {
-		if ((channel.flags & types.STATION.METHOD.AUTOMATIC)) {
-			return startDateFinder.heuristic(
+		var interval = (function() {
+			if ((channel.flags & types.STATION.METHOD.AUTOMATIC))
+				return DAY;
+
+			if ((channel.flags & types.STATION.METHOD.MANUAL))
+				return 27 * 24 * 60 * 60 * 1000
+
+			throw new Error('Unknown measurements method: ' + (channel.flags & types.STATION.METHOD._MASK));
+		})();
+
+		return startDateFinder.accurate(
 				function(date) {
 					return byDate(date, [channel], station).then(function(measurements) {
 						return !!measurements.length;
 					});
 				},
 				date,
-				config.measurements.start_date_epsilon
-			);
-		}
-
-		if ((channel.flags & types.STATION.METHOD.MANUAL)) {
-			return startDateFinder.accurate(
-				function(date) {
-					return byDate(date, [channel], station).then(function(measurements) {
-						return !!measurements.length;
-					});
-				},
-				date,
-				27 * 24 * 60 * 60 * 1000
-			);
-		}
-
-		throw new Error('Unknown measurements method: ' + (channel.flags & types.STATION.METHOD._MASK));
+				interval
+		);
 	};
 
 	return find().then(function(startDate) {

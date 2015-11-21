@@ -78,7 +78,6 @@ datasource:
       queue: 'datasource.pl-wielkopolskie'
 
     measurements:
-      start_date_epsilon: 86400000 # 24 hours
       update_interval: 300000 # 5 mins
 
     configuration:
