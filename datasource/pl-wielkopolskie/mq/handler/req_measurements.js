@@ -41,7 +41,7 @@ module.exports = function(payload) {
 							return true;
 
 						return step(
-							channel.method == types.STATION.METHOD.MANUAL
+							(channel.flags & types.STATION.METHOD.MANUAL)
 								? addMonth(date)
 								: addDay(date)
 						);
