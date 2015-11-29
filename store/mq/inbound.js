@@ -5,6 +5,7 @@ var config = require('config').store,
 	announce = require('./handler/announce'),
 	measurement = require('./handler/measurement'),
 	fin_measurements = require('./handler/fin_measurements'),
+	channel_health = require('./handler/channel_health'),
 	types = require('../../types/types.js'),
 	q = require('q');
 
@@ -35,6 +36,9 @@ var init = function() {
 
 							case types.MQ.FIN_MEASUREMENTS:
 								return fin_measurements(envelope.payload, envelope.datasource_code);
+
+							case types.MQ.CHANNEL_HEALTH:
+								return channel_health(envelope.payload);
 
 							default:
 								logger.error('[mq.inbound] Unknown message type %s', envelope.type);

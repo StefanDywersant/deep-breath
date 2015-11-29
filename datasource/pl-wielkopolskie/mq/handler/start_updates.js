@@ -1,7 +1,8 @@
 var q = require('q'),
 	logger = require('../../../../service/logger'),
 	channels = require('../../api/channels'),
-	updates = require('../../daemon/updates');
+	updates = require('../../daemon/updates'),
+	health = require('../../daemon/health');
 
 
 module.exports = function(payload) {
@@ -13,6 +14,9 @@ module.exports = function(payload) {
 		if (!channel)
 			throw new Error('Channel not found for id=%s', channel.id);
 
-		return updates.start(channel);
+		return q.all([
+			updates.start(channel),
+			health.start(channel)
+		]);
 	});
 };

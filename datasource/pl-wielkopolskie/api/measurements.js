@@ -177,7 +177,7 @@ var startDate = function(date, channel, station) {
 				return DAY;
 
 			if ((channel.flags & types.STATION.METHOD.MANUAL))
-				return 27 * 24 * 60 * 60 * 1000
+				return 27 * DAY;
 
 			throw new Error('Unknown measurements method: ' + (channel.flags & types.STATION.METHOD._MASK));
 		})();

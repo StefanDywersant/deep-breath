@@ -3,6 +3,7 @@ module.exports = {
 		ANNOUNCE: 'announce',
 		REQ_MEASUREMENTS: 'req_measurements',
 		FIN_MEASUREMENTS: 'fin_measurements',
+		CHANNEL_HEALTH: 'channel_health',
 		MEASUREMENT: 'measurements',
 		START_UPDATES: 'start_updates'
 	},
@@ -34,6 +35,18 @@ module.exports = {
 			EXTRA_URBAN: 0x30000,
 			FAR_EXTRA_URBAN: 0x40000,
 			_MASK: 0xf0000
+		}
+	},
+	CHANNEL: {
+		HEALTH: {
+			HEALTHY: 0x00001,
+			FAULTY: 0x00000,
+			_MASK: 0x0000f
+		},
+		METHOD: {
+			AUTOMATIC: 0x00010,
+			MANUAL: 0x00020,
+			_MASK: 0x000f0
 		}
 	}
 };

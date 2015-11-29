@@ -90,3 +90,6 @@ datasource:
       host: 'localhost'
       port: 6379
       prefix: '' # set in environment specific file
+
+    health:
+      interval: 1800000
