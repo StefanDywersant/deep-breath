@@ -1,5 +1,6 @@
 var stationsStore = require('../../../service/store/stations'),
 	entitize = require('../entitize/station'),
+	useful = require('../../service/useful'),
 	q = require('q');
 
 module.exports = function(app) {
@@ -14,6 +15,8 @@ module.exports = function(app) {
 			req.params.limit
 		).then(function(stations) {
 			return q.all(stations.map(entitize));
+		}).then(function(stations) {
+			return stations.filter(useful.station);
 		}).done(function(stations) {
 			res.send(stations);
 		}, function(error) {

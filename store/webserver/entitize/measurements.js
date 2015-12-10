@@ -3,8 +3,8 @@ module.exports = function(measurements, channel) {
 		channel_uuid: channel.uuid,
 		measurements: measurements.map(function(measurement) {
 			return {
-				begin: measurement.begin,
-				end: measurement.end,
+				begin: measurement.begin.getTime(),
+				end: measurement.end.getTime(),
 				value: measurement.value
 			}
 		})

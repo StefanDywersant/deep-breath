@@ -2,21 +2,23 @@ var channels = require('../../../service/store/channels'),
 	measurements = require('../../../service/store/measurements'),
 	aqi = require('../../../service/aqi'),
 	config = require('config').mobile,
+	useful = require('../../service/useful'),
 	q = require('q');
+
 
 module.exports = function(station) {
 	return channels.byStation(station).then(function(channels) {
-		return measurements.lastByChannels(channels).then(function(measurements) {
+		return measurements.lastByChannels(channels).then(function (measurements) {
 
 			// add available station channels
-			station.channels = channels.map(function(channel) {
-				var measurement = measurements.reduce(function(found, measurement) {
+			station.channels = channels.map(function (channel) {
+				var measurement = measurements.reduce(function (found, measurement) {
 					if (found)
 						return found;
 
 					return measurement.channel_uuid == channel.uuid
-						? measurement
-						: null;
+							? measurement
+							: null;
 				}, null);
 
 				if (measurement) {
@@ -24,7 +26,7 @@ module.exports = function(station) {
 				}
 
 				return channel;
-			});
+			}).filter(useful.channel);
 
 			// add parameter groups map
 			station.parameter_groups = config.parameter_groups;
