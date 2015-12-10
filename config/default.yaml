@@ -34,17 +34,17 @@ mobile:
       parameters:
         - co
         - pm10
+        - pm2.5
+        - bzn
+        - o3
+        - so2
+        - no2
+        - no
+        - nox
         - pm10_as
         - pm10_bap
         - pm10_cd
         - pm10_ni
-        - pm2.5
-        - no
-        - no2
-        - nox
-        - so2
-        - o3
-        - bzn
 
     - code: 'weather'
       name: 'Dane pogodowe'
