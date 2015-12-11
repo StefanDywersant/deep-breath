@@ -41,6 +41,7 @@ mobile:
         - no2
         - no
         - nox
+        - pb
         - pm10_as
         - pm10_bap
         - pm10_cd

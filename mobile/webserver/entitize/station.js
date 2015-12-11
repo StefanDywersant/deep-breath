@@ -11,7 +11,7 @@ module.exports = function(station) {
 		return measurements.lastByChannels(channels).then(function (measurements) {
 
 			// add available station channels
-			station.channels = channels.map(function (channel) {
+			var allChannels = channels.map(function (channel) {
 				var measurement = measurements.reduce(function (found, measurement) {
 					if (found)
 						return found;
@@ -22,11 +22,31 @@ module.exports = function(station) {
 				}, null);
 
 				if (measurement) {
-					channel.last_measurement = measurement.measurements[0]
+					channel.last_measurement = measurement.measurements[0];
 				}
 
 				return channel;
 			}).filter(useful.channel);
+
+			var channelGroups = allChannels.reduce(function(channelGroups, channel) {
+				var key = channel.last_measurement.begin.getTime() + '_' + channel.last_measurement.end.getTime();
+
+				if (key in channelGroups) {
+					channelGroups[key].channels.push(channel);
+				} else {
+					channelGroups[key] = {
+						begin: channel.last_measurement.begin,
+						end: channel.last_measurement.end,
+						channels: [channel]
+					};
+				}
+
+				return channelGroups;
+			}, {});
+
+			station.channel_groups = Object.keys(channelGroups).map(function(key) {
+				return channelGroups[key];
+			});
 
 			// add parameter groups map
 			station.parameter_groups = config.parameter_groups;
@@ -34,26 +54,30 @@ module.exports = function(station) {
 			return station;
 		});
 	}).then(function(station) {
-		var channelValues = station.channels.filter(function(channel) {
-			return !!channel.last_measurement;
-		}).map(function(channel) {
-			return {
-				channel_uuid: channel.uuid,
-				value: channel.last_measurement.value
-			};
-		});
-
-		return aqi.compute(channelValues).then(function(channelIndexes) {
-			channelIndexes.channels.forEach(function(channelIndex) {
-				station.channels.filter(function(channel) {
-					return channel.uuid == channelIndex.channel_uuid;
-				}).forEach(function(channel) {
-					channel.index = channelIndex.index;
-				});
+		return q.all(station.channel_groups.map(function(channel_group) {
+			var channelValues = channel_group.channels.filter(function(channel) {
+				return !!channel.last_measurement;
+			}).map(function(channel) {
+				return {
+					channel_uuid: channel.uuid,
+					value: channel.last_measurement.value
+				};
 			});
 
-			station.index = channelIndexes.index;
+			return aqi.compute(channelValues).then(function(channelIndexes) {
+				channelIndexes.channels.forEach(function(channelIndex) {
+					channel_group.channels.filter(function(channel) {
+						return channel.uuid == channelIndex.channel_uuid;
+					}).forEach(function(channel) {
+						channel.index = channelIndex.index;
+					});
+				});
 
+				channel_group.index = channelIndexes.index;
+
+				return channel_group;
+			});
+		})).then(function() {
 			return station;
 		});
 	});

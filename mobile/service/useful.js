@@ -2,7 +2,9 @@ var DAY = 24 * 60 * 60 * 1000;
 
 
 var station = function(station) {
-	return station.channels.length > 0;
+	return !!station.channel_groups.reduce(function(sum, channelGroup) {
+		return sum + channelGroup.channels.length;
+	}, 0);
 };
 
 
