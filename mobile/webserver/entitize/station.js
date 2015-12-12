@@ -35,8 +35,8 @@ module.exports = function(station) {
 					channelGroups[key].channels.push(channel);
 				} else {
 					channelGroups[key] = {
-						begin: channel.last_measurement.begin,
-						end: channel.last_measurement.end,
+						begin: channel.last_measurement.begin.getTime(),
+						end: channel.last_measurement.end.getTime(),
 						channels: [channel]
 					};
 				}
