@@ -7,7 +7,7 @@ var outbound = require('../outbound'),
 var envelope = function(station, channel) {
 	return q({
 		type: types.MQ.FIN_MEASUREMENTS,
-		datasource_code: 'pl-wielkopolskie',
+		datasource_code: code.DATASOURCE,
 		payload: {
 			channel_code: code.CHANNEL(station.id, channel.id)
 		}

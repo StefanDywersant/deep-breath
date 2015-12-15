@@ -1,4 +1,5 @@
-var config = require('config').datasource['pl-wielkopolskie'],
+var config = require('config').datasource.dacsystem,
+	origin = require('../config/origin'),
 	rabbitmq = require('../../../service/rabbitmq'),
 	logger = require('../../../service/logger'),
 	os = require('os'),
@@ -10,7 +11,7 @@ var config = require('config').datasource['pl-wielkopolskie'],
 
 var consumerTag = [
 	'datasource',
-	'pl-wielkopolskie',
+	origin.code,
 	os.hostname(),
 	process.pid
 ].join(':');
@@ -40,7 +41,7 @@ var init = function() {
 					})().done(function() {
 						channel.ack(message);
 					}, function(error) {
-						channel.nack(message, null, true)
+						channel.nack(message, null, true);
 						logger.error('[mq:inbound] Error: ' + error.message, error.stack);
 					});
 				} catch (error) {
@@ -54,12 +55,12 @@ var init = function() {
 				'topic',
 				{durable: true}
 			).then(function() {
-				return channel.assertQueue(config.rabbitmq.queue);
+				return channel.assertQueue(origin.rabbitmq.queue);
 			}).then(function(queue) {
 				return channel.bindQueue(
 					queue.queue,
 					config.rabbitmq.exchange,
-					'datasource:pl-wielkopolskie'
+					origin.rabbitmq.pattern
 				).then(function() {
 					logger.info('[mq:inbound] Setting consumer tag to: %s', consumerTag);
 

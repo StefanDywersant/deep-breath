@@ -42,19 +42,26 @@ mobile:
         - no
         - nox
         - pb
+        - tln
+        - oxy
+        - mpxy
+        - ebzn
         - pm10_as
         - pm10_bap
         - pm10_cd
         - pm10_ni
+        - pm10_pb
 
     - code: 'weather'
       name: 'Dane pogodowe'
       parameters:
         - temp
+        - rain
         - humid
         - press
         - ws
         - wd
+        - rad
 
 aqi:
   webserver:
@@ -63,11 +70,68 @@ aqi:
     childs: 2
 
 datasource:
-  pl-wielkopolskie:
+  dacsystem:
+    origins:
+      - code: 'pl-wielkopolskie'
+        rabbitmq:
+          queue: 'datasource.pl-wielkopolskie'
+          pattern: 'datasource:pl-wielkopolskie'
+        api:
+          host: 'powietrze.poznan.wios.gov.pl'
+
+      - code: 'pl-zachodniopomorskie'
+        rabbitmq:
+          queue: 'datasource.pl-zachodniopomorskie'
+          pattern: 'datasource:pl-zachodniopomorskie'
+        api:
+          host: 'powietrze.wios.szczecin.pl'
+
+      - code: 'pl-lubuskie'
+        rabbitmq:
+          queue: 'datasource.pl-lubuskie'
+          pattern: 'datasource:pl-lubuskie'
+        api:
+          host: '80.53.180.198'
+
+      - code: 'pl-slaskie'
+        rabbitmq:
+          queue: 'datasource.pl-slaskie'
+          pattern: 'datasource:pl-slaskie'
+        api:
+          host: 'powietrze.katowice.wios.gov.pl'
+
+      - code: 'pl-dolnoslaskie'
+        rabbitmq:
+          queue: 'datasource.pl-dolnoslaskie'
+          pattern: 'datasource:pl-dolnoslaskie'
+        api:
+          host: 'air.wroclaw.pios.gov.pl'
+
+      - code: 'pl-malopolskie'
+        rabbitmq:
+          queue: 'datasource.pl-malopolskie'
+          pattern: 'datasource:pl-malopolskie'
+        api:
+          host: 'monitoring.krakow.pios.gov.pl'
+
+      - code: 'pl-opolskie'
+        rabbitmq:
+          queue: 'datasource.pl-opolskie'
+          pattern: 'datasource:pl-opolskie'
+        api:
+          host: 'www.opole.pios.gov.pl'
+          port: 81
+
+      - code: 'pl-podkarpackie'
+        rabbitmq:
+          queue: 'datasource.pl-podkarpackie'
+          pattern: 'datasource:pl-podkarpackie'
+        api:
+          host: 'stacje.wios.rzeszow.pl'
+
     api:
-      host: 'powietrze.poznan.wios.gov.pl'
       paths:
-        stations: '/'
+        stations: '/stacje/aktywne'
         configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
         measurements: '/dane-pomiarowe/pobierz'
       ratelimit: 500
@@ -76,7 +140,6 @@ datasource:
     rabbitmq:
       url: 'amqp://localhost'
       exchange: 'deepbreath'
-      queue: 'datasource.pl-wielkopolskie'
 
     measurements:
       update_interval: 300000 # 5 mins

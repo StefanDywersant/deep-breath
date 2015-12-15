@@ -1,4 +1,4 @@
-var config = require('config').datasource['pl-wielkopolskie'],
+var config = require('config').datasource.dacsystem,
 	rabbitmq = require('../../../service/rabbitmq'),
 	logger = require('../../../service/logger');
 

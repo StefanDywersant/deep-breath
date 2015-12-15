@@ -1,5 +1,5 @@
 var requests = require('./requests'),
-	config = require('config').datasource['pl-wielkopolskie'],
+	config = require('config').datasource.dacsystem,
 	redis = require('../../../service/redis'),
 	qthrottle = require('qthrottle')(1),
 	q = require('q'),

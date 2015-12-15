@@ -10,7 +10,6 @@ var envelope = function(stations) {
 	return q.all(
 		stations.map(entitizeStation)
 	).then(function(mqStations) {
-		console.log(JSON.stringify(mqStations));
 		return {
 			type: types.MQ.ANNOUNCE,
 			datasource_code: code.DATASOURCE,

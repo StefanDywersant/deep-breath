@@ -16,6 +16,7 @@ module.exports = {
 		METHOD: {
 			AUTOMATIC: 0x00010,
 			MANUAL: 0x00020,
+			PASSIVE: 0x00040,
 			_MASK: 0x000f0
 		},
 		PURPOSE: {

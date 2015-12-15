@@ -5,7 +5,7 @@ var requests = require('./requests'),
 	logger = require('../../../service/logger'),
 	entities = require('entities'),
 	redis = require('../../../service/redis'),
-	config = require('config').datasource['pl-wielkopolskie'],
+	config = require('config').datasource.dacsystem,
 	channels = require('./channels');
 
 
@@ -42,9 +42,9 @@ var entitize = function(attributes) {
 			};
 
 		return {
-			street: parts[0].trim(),
-			code: parts[1].trim(),
-			city: parts[2].trim()
+			street: parts[0] ? parts[0].trim() : null,
+			code: parts[1] ? parts[1].trim() : null,
+			city: parts[2] ? parts[2].trim() : null
 		}
 	};
 
@@ -87,6 +87,7 @@ var entitize = function(attributes) {
 	var purpose = function() {
 		switch (attributes['Cel pomiarowy']) {
 			case 'ochrona zdrowia ludzi':
+			case 'zdrowie ludzkie':
 				return types.STATION.PURPOSE.HUMAN_HEALTH_PROTECTION;
 
 			case 'ochrona roślin':
@@ -172,7 +173,9 @@ var entitize = function(attributes) {
 		return {
 			longitude: parseFloat(longitudeMatch[2]) * (longitudeMatch[1] == 'E' ? 1 : -1),
 			latitude: parseFloat(latitudeMatch[2]) * (latitudeMatch[1] == 'N' ? 1 : -1),
-			altitude: attributes['Wysokość m n.p.m.'].trim() ? parseInt(attributes['Wysokość m n.p.m.']) : null
+			altitude: (attributes['Wysokość m n.p.m.'] && attributes['Wysokość m n.p.m.'].trim())
+				? parseInt(attributes['Wysokość m n.p.m.'])
+				: null
 		}
 	};
 
@@ -199,7 +202,7 @@ var entitize = function(attributes) {
 
 
 var listPage = function() {
-	return requests.get('/stacje/aktywne').then(function(html) {
+	return requests.get(config.api.paths.stations).then(function(html) {
 		var $ = cheerio.load(html),
 			paths = $('.station-list tr td a.link').map(function() {
 				return $(this).attr('href');

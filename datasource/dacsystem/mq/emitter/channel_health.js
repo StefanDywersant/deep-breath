@@ -9,7 +9,7 @@ var envelope = function(channel, health) {
 	return stations.byChannel(channel).then(function(station) {
 		return {
 			type: types.MQ.CHANNEL_HEALTH,
-			datasource_code: 'pl-wielkopolskie',
+			datasource_code: code.DATASOURCE,
 			payload: {
 				channel_code: code.CHANNEL(station.id, channel.id),
 				health: health

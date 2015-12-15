@@ -1,4 +1,4 @@
-var config = require('config').datasource['pl-wielkopolskie'],
+var config = require('config').datasource.dacsystem,
 	logger = require('../../../service/logger'),
 	measurements = require('../api/measurements'),
 	stations = require('../api/stations'),

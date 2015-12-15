@@ -1,9 +1,9 @@
 datasource:
-  pl-wielkopolskie:
+  dacsystem:
     redis:
       host: 'localhost'
       port: 6379
-      prefix: 'deep-breath:pl-wielkopolskie:'
+      prefix: 'deep-breath:'
 
 store:
   webserver:
