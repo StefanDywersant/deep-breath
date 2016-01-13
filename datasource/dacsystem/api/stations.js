@@ -157,15 +157,34 @@ var entitize = function(attributes) {
 
 
 	var location = function() {
-		var longitudeMatch = attributes['Długość geograficzna'].match(/^([EW]) ([0-9\.]+)$/),
-			latitudeMatch = attributes['Szerokość geograficzna'].match(/^([NS]) ([0-9\.]+)$/);
+		var longitudeParam = attributes['Długość geograficzna'],
+			latitudeParam = attributes['Szerokość geograficzna'];
+
+		if (!longitudeParam) {
+			logger.warn(
+				'[api.stations:location] Missing longitude attribute for station %s',
+				attributes['Nazwa stacji']
+			);
+			return null;
+		}
+
+		if (!latitudeParam) {
+			logger.warn(
+				'[api.stations:location] Missing latitude attribute for station %s',
+				attributes['Nazwa stacji']
+			);
+			return null;
+		}
+
+		var longitudeMatch = longitudeParam.match(/^([EW]) ([0-9\.]+)$/),
+			latitudeMatch = latitudeParam.match(/^([NS]) ([0-9\.]+)$/);
 
 		if (!longitudeMatch || !latitudeMatch) {
 			logger.warn(
 				'[api.stations:location] Invalid location of station %s: \'%s\', \'%s\'',
 				attributes['Nazwa stacji'],
-				attributes['Długość geograficzna'],
-				attributes['Szerokość geograficzna']
+				longitudeParam,
+				latitudeParam
 			);
 			return null;
 		}
