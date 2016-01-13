@@ -11,8 +11,10 @@ module.exports = function(payload) {
 	logger.verbose('[start_updates] Starting updates for channel=%s', payload.channel_code);
 
 	return channels.byId(channelId).then(function(channel) {
-		if (!channel)
-			throw new Error('Channel not found for id=%s', channel.id);
+		if (!channel) {
+			logger.error('[mq.handler.start_updates] Channel %s doesn\'t exists', channelId);
+			return null;
+		}
 
 		return q.all([
 			updates.start(channel),
