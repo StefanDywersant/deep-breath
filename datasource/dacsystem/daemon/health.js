@@ -27,6 +27,9 @@ var last = function(measurement) {
 
 var emit = function(channelId, healthy) {
 	return channels.byId(channelId).then(function(channel) {
+		if (!channel)
+			throw new Error('Channel having id=%s not found', channelId);
+
 		if (channel.id in channelStatuses) {
 			if (channelStatuses[channel.id] != healthy) {
 				return emitChannelHealth(channel, healthy);

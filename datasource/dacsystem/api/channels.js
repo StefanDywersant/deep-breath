@@ -29,7 +29,7 @@ var byId = function(id) {
 		});
 
 		if (!channels.length)
-			throw new Error('Channel id=' + id + ' not found');
+			return null;
 
 		return entitize(channels[0]);
 	});

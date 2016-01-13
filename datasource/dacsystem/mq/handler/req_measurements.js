@@ -25,6 +25,11 @@ module.exports = function(payload) {
 		since = new Date(payload.timestamp);
 
 	return channels.byId(channelId).then(function(channel) {
+		if (!channel) {
+			logger.error('[mq.handler.req_measurements] Channel %s doesn\'t exists', channelId);
+			return null;
+		}
+
 		return stations.byChannel(channel).then(function(station) {
 			return measurements.startDate(
 				since,
