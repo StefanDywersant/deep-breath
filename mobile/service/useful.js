@@ -9,7 +9,13 @@ var station = function(station) {
 
 
 var channel = function(channel) {
-	return channel.last_measurement.end.getTime() + DAY > Date.now();
+	if (!!channel.last_measurement)
+		return false;
+
+	if (channel.last_measurement.end.getTime() + DAY < Date.now())
+		return false;
+
+	return true;
 };
 
 
