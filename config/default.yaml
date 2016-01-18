@@ -21,6 +21,8 @@ store:
     nearest:
       limit: 10
       distance: 300000
+    search:
+      limit: 10
 
 mobile:
   webserver:

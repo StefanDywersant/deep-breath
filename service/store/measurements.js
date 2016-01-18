@@ -1,5 +1,6 @@
 var config = require('config'),
-	requests = require('../requests')({hostname: config.store.webserver.hostname, port: config.store.webserver.port});
+	requests = require('../requests')({hostname: config.store.webserver.hostname, port: config.store.webserver.port}),
+	q = require('q');
 
 
 var entitize = function(channelMeasurements) {
@@ -17,6 +18,9 @@ var entitize = function(channelMeasurements) {
 
 
 var lastByChannels = function(channels) {
+	if (!channels.length)
+		return q([]);
+
 	var path = [
 		'/measurements',
 		channels.map(function(channel) {

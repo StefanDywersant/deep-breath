@@ -75,4 +75,37 @@ Stations.findByUUID = function(uuid) {
 	return Stations.findOne({where: {uuid: uuid}});
 };
 
+Stations.search = function(query, offset, limit) {
+	offset = offset ? offset : 0;
+	limit = limit ? limit : config.stations.search.limit;
+
+	return sequelize.query(
+		'SELECT * ' +
+		'FROM stations ' +
+		'WHERE ' +
+			'TRANSLATE(' +
+				'LOWER(name || address),' +
+				'\'ąćęłńóśżź\',' +
+				'\'acelnoszz\'' +
+			') ' +
+			'LIKE ' +
+			'TRANSLATE(' +
+				'LOWER(?),' +
+				'\'ąćęłńóśżź\',' +
+				'\'acelnoszz\'' +
+			') ' +
+		'ORDER BY name ASC ' +
+		'LIMIT ? ' +
+		'OFFSET ?',
+		{
+			replacements: [
+				query ? '%' + query + '%' : '%',
+				limit,
+				offset
+			],
+			model: Stations
+		}
+	);
+};
+
 module.exports = Stations;

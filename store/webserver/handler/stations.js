@@ -42,4 +42,18 @@ module.exports = function(app) {
 			res.status(500).send(error.message);
 		});
 	});
+
+	app.get('/stations/search/:query?/:offset?/:limit?', function(req, res) {
+		Stations.search(
+			req.params.query,
+			req.params.offset,
+			req.params.limit
+		).then(function(stations) {
+			return q.all(stations.map(entitize));
+		}).done(function(stations) {
+			res.send(stations);
+		}, function(error) {
+			res.status(500).send(error.message);
+		});
+	});
 };

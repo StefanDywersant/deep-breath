@@ -16,11 +16,7 @@ var byUUID = function(uuid) {
 
 
 var nearest = function(location, distance, limit) {
-	var path = [
-		'/stations',
-		'nearest',
-		location.latitude + ',' + location.longitude
-	];
+	var path = ['/stations', 'nearest', location.latitude + ',' + location.longitude];
 
 	if (distance)
 		path.push(distance);
@@ -34,7 +30,23 @@ var nearest = function(location, distance, limit) {
 };
 
 
+var search = function(query, offset, limit) {
+	var path = ['/stations', 'search', query];
+
+	if (offset)
+		path.push(offset);
+
+	if (limit)
+		path.push(limit);
+
+	return requests.get(path.join('/')).then(function(result) {
+		return JSON.parse(result);
+	});
+};
+
+
 module.exports = {
 	byUUID: byUUID,
-	nearest: nearest
+	nearest: nearest,
+	search: search
 };
