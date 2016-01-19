@@ -24,15 +24,15 @@ module.exports = function(app) {
 		});
 	});
 
-	app.get('/stations/search/:query?/:offset?/:limit?', function(req, res) {
+	app.get('/stations/search/*?', function(req, res) {
+		var args = req.params[0].split('/');
+
 		stationsStore.search(
-			req.params.query,
-			req.params.offset,
-			req.params.limit
+			args[0], // query
+			args[1], // offset
+			args[2] // limit
 		).then(function(stations) {
 			return q.all(stations.map(entitize));
-		}).then(function(stations) {
-			return stations.filter(useful.station);
 		}).done(function(stations) {
 			res.send(stations);
 		}, function(error) {

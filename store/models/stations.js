@@ -94,6 +94,7 @@ Stations.search = function(query, offset, limit) {
 				'\'ąćęłńóśżź\',' +
 				'\'acelnoszz\'' +
 			') ' +
+			'AND deleted_at IS NULL ' +
 		'ORDER BY name ASC ' +
 		'LIMIT ? ' +
 		'OFFSET ?',
