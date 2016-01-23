@@ -40,4 +40,12 @@ module.exports = function(app) {
 		});
 	});
 
+	app.get('/stations/uuid/:uuid', function(req, res) {
+		stationsStore.byUUID(req.params.uuid).then(entitize).done(function(station) {
+			res.send(station);
+		}, function(error) {
+			res.status(500).send(error.stack);
+		});
+	});
+
 };
