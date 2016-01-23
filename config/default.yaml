@@ -75,6 +75,7 @@ datasource:
   dacsystem:
     origins:
       - code: 'pl-wielkopolskie'
+        voivodeship: 'wielkopolskie'
         rabbitmq:
           queue: 'datasource.pl-wielkopolskie'
           pattern: 'datasource:pl-wielkopolskie'
@@ -82,6 +83,7 @@ datasource:
           host: 'powietrze.poznan.wios.gov.pl'
 
       - code: 'pl-zachodniopomorskie'
+        voivodeship: 'zachodniopomorskie'
         rabbitmq:
           queue: 'datasource.pl-zachodniopomorskie'
           pattern: 'datasource:pl-zachodniopomorskie'
@@ -89,6 +91,7 @@ datasource:
           host: 'powietrze.wios.szczecin.pl'
 
       - code: 'pl-lubuskie'
+        voivodeship: 'lubuskie'
         rabbitmq:
           queue: 'datasource.pl-lubuskie'
           pattern: 'datasource:pl-lubuskie'
@@ -96,6 +99,7 @@ datasource:
           host: '80.53.180.198'
 
       - code: 'pl-slaskie'
+        voivodeship: 'śląskie'
         rabbitmq:
           queue: 'datasource.pl-slaskie'
           pattern: 'datasource:pl-slaskie'
@@ -103,6 +107,7 @@ datasource:
           host: 'powietrze.katowice.wios.gov.pl'
 
       - code: 'pl-dolnoslaskie'
+        voivodeship: 'dolnośląskie'
         rabbitmq:
           queue: 'datasource.pl-dolnoslaskie'
           pattern: 'datasource:pl-dolnoslaskie'
@@ -110,6 +115,7 @@ datasource:
           host: 'air.wroclaw.pios.gov.pl'
 
       - code: 'pl-malopolskie'
+        voivodeship: 'malopolskie'
         rabbitmq:
           queue: 'datasource.pl-malopolskie'
           pattern: 'datasource:pl-malopolskie'
@@ -117,6 +123,7 @@ datasource:
           host: 'monitoring.krakow.pios.gov.pl'
 
       - code: 'pl-opolskie'
+        voivodeship: 'opolskie'
         rabbitmq:
           queue: 'datasource.pl-opolskie'
           pattern: 'datasource:pl-opolskie'
@@ -125,6 +132,7 @@ datasource:
           port: 81
 
       - code: 'pl-podkarpackie'
+        voivodeship: 'podkarpackie'
         rabbitmq:
           queue: 'datasource.pl-podkarpackie'
           pattern: 'datasource:pl-podkarpackie'

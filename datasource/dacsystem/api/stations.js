@@ -6,7 +6,8 @@ var requests = require('./requests'),
 	entities = require('entities'),
 	redis = require('../../../service/redis'),
 	config = require('config').datasource.dacsystem,
-	channels = require('./channels');
+	channels = require('./channels'),
+	origin = require('../config/origin');
 
 
 var entitize = function(attributes) {
@@ -31,20 +32,24 @@ var entitize = function(attributes) {
 
 	var address = function() {
 		if (!attributes['Adres'].trim())
-			return null;
+			return {
+				voivodeship: origin.voivodeship
+			};
 
 		var parts = attributes['Adres'].split(',');
 
 		if (parts.length == 2)
 			return {
 				street: parts[1].trim(),
-				city: parts[0].trim()
+				city: parts[0].trim(),
+				voivodeship: origin.voivodeship
 			};
 
 		return {
 			street: parts[0] ? parts[0].trim() : null,
 			code: parts[1] ? parts[1].trim() : null,
-			city: parts[2] ? parts[2].trim() : null
+			city: parts[2] ? parts[2].trim() : null,
+			voivodeship: origin.voivodeship
 		}
 	};
 
