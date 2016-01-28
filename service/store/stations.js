@@ -9,39 +9,43 @@ var byUUID = function(uuid) {
 		uuid
 	].join('/');
 
-	return requests.get(path).then(function(result) {
-		return JSON.parse(result);
-	});
+	return requests.get(path).then(
+		result => JSON.parse(result)
+	);
 };
 
 
 var nearest = function(location, distance, limit) {
 	var path = ['/stations', 'nearest', location.latitude + ',' + location.longitude];
 
+	//@todo: fix
 	if (distance)
 		path.push(distance);
 
+	//@todo: fix
 	if (limit)
 		path.push(limit);
 
-	return requests.get(path.join('/')).then(function(result) {
-		return JSON.parse(result);
-	});
+	return requests.get(path.join('/')).then(
+		result => JSON.parse(result)
+	);
 };
 
 
 var search = function(query, offset, limit) {
 	var path = ['/stations', 'search', query];
 
+	//@todo: fix
 	if (offset)
 		path.push(offset);
 
+	//@todo: fix
 	if (limit)
 		path.push(limit);
 
-	return requests.get(path.join('/')).then(function(result) {
-		return JSON.parse(result);
-	});
+	return requests.get(path.join('/')).then(
+		result => JSON.parse(result)
+	);
 };
 
 

@@ -1,3 +1,5 @@
+'use strict';
+
 var channels = require('../../../service/store/channels'),
 	measurements = require('../../../service/store/measurements'),
 	aqi = require('../../../service/aqi'),
@@ -6,7 +8,7 @@ var channels = require('../../../service/store/channels'),
 	q = require('q');
 
 
-module.exports = function(station) {
+module.exports = function(station, o = {useful: false}) {
 	return channels.byStation(station).then(function(channels) {
 		return measurements.lastByChannels(channels).then(function (measurements) {
 
@@ -26,9 +28,16 @@ module.exports = function(station) {
 				}
 
 				return channel;
-			}).filter(useful.channel);
+			});
+
+			// filter useful channels
+			if (o.useful)
+				allChannels = allChannels.filter(useful.channel);
 
 			var channelGroups = allChannels.reduce(function(channelGroups, channel) {
+				if (!channel.last_measurement)
+					return channelGroups;
+
 				var key = channel.last_measurement.begin.getTime() + '_' + channel.last_measurement.end.getTime();
 
 				if (key in channelGroups) {

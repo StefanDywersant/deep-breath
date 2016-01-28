@@ -14,11 +14,11 @@ var entitize = function(apiChannel) {
 
 
 var byStationId = function(stationId) {
-	return configuration.get().then(function(configuration) {
-		return q.all(configuration.channels.filter(function(channel) {
-			return channel.station_id == stationId;
-		}).map(entitize));
-	});
+	return configuration.get().then(
+		(configuration) => q.all(configuration.channels.filter(
+			(channel) => channel.station_id == stationId).map(entitize)
+		)
+	);
 };
 
 
@@ -37,9 +37,9 @@ var byId = function(id) {
 
 
 var all = function() {
-	return configuration.get().then(function(configuration) {
-		return q.all(configuration.channels.map(entitize));
-	});
+	return configuration.get().then(
+		(configuration) => q.all(configuration.channels.map(entitize))
+	);
 };
 
 
