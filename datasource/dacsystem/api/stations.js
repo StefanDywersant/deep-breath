@@ -1,3 +1,5 @@
+'use strict';
+
 var requests = require('./requests'),
 	cheerio = require('cheerio'),
 	q = require('q'),
@@ -36,21 +38,58 @@ var entitize = function(attributes) {
 				voivodeship: origin.voivodeship
 			};
 
-		var parts = attributes['Adres'].split(',');
-
-		if (parts.length == 2)
-			return {
-				street: parts[1].trim(),
-				city: parts[0].trim(),
+		var address = {
 				voivodeship: origin.voivodeship
-			};
+			},
+			parts = attributes['Adres'].split(',').map(function(part) {
+				return part.trim();
+			});
 
-		return {
-			street: parts[0] ? parts[0].trim() : null,
-			code: parts[1] ? parts[1].trim() : null,
-			city: parts[2] ? parts[2].trim() : null,
-			voivodeship: origin.voivodeship
+		// extract city code
+		for (let i = 0; i < parts.length; i++) {
+			if (parts[i].match(/[0-9]{2}-[0-9]{3}/)) {
+				address.code = parts[i];
+				parts.splice(i, 1);
+				break;
+			}
 		}
+
+		// extract street
+		for (let i = 0; i < parts.length; i++) {
+			if (parts[i].match(/ [0-9]+|[uU][lL]\./)) {
+				address.street = parts[i].replace(/ul\. ?/, '');
+				parts.splice(i, 1);
+
+				// extract city
+				if (parts.length == 1) {
+					address.city = parts[0];
+					return address;
+				}
+
+				break;
+			}
+		}
+
+		// guess city
+		for (let i = 0; i < parts.length; i++) {
+			if (config.address.cities.indexOf(parts[i]) > -1) {
+				address.city = parts[i]
+					.replace('Wroc��aw', 'Wrocław')
+					.replace('Gorzow Wlkp', 'Gorzów Wlkp')
+					.replace('Zielona Gora', 'Zielona Góra');
+				parts.splice(i, 1);
+
+				// extract street
+				if (parts.length == 1) {
+					address.street = parts[0];
+					return address;
+				}
+
+				break;
+			}
+		}
+
+		return address;
 	};
 
 
