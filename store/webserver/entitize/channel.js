@@ -8,11 +8,11 @@ module.exports = function(channel) {
 		return parameter.getUnit().then(function(unit) {
 			return {
 				uuid: channel.uuid,
+				flags: channel.flags,
 				parameter: {
 					uuid: parameter.uuid,
 					name: parameter.name,
 					code: parameter.code,
-					flags: channel.flags,
 					unit: {
 						uuid: unit.uuid,
 						format: unit.format
