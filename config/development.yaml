@@ -1,0 +1,21 @@
+datasource:
+  dacsystem:
+    redis:
+      host: 'localhost'
+      port: 6379
+      prefix: 'deep-breath:dev:'
+
+store:
+  webserver:
+    port: 8081
+    hostname: 'localhost'
+
+mobile:
+  webserver:
+    port: 8080
+    hostname: 'localhost'
+
+aqi:
+  webserver:
+    port: 8082
+    hostname: 'localhost'

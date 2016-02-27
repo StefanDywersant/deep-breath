@@ -1,9 +1,13 @@
 var config = require('config').store,
-	rabbitmq = require('../../service/rabbitmq')(config.rabbitmq),
+	rabbitmq = require('../../service/rabbitmq'),
 	logger = require('../../service/logger'),
 	os = require('os'),
-	announce = require('../controller/announce'),
-	types = require('../../types/types.js');
+	announce = require('./handler/announce'),
+	measurement = require('./handler/measurement'),
+	fin_measurements = require('./handler/fin_measurements'),
+	channel_health = require('./handler/channel_health'),
+	types = require('../../types/types.js'),
+	q = require('q');
 
 
 var consumerTag = [
@@ -13,54 +17,80 @@ var consumerTag = [
 ].join(':');
 
 
-module.exports = rabbitmq.then(function(connection) {
-	return connection.createChannel().then(function(channel) {
-		var receive = function(message) {
-			try {
-				var envelope = JSON.parse(message.content.toString());
+var init = function() {
+	return rabbitmq(config.rabbitmq).then(function(connection) {
+		return connection.createChannel().then(function(channel) {
+			var receive = function(message) {
+				try {
+					var envelope = JSON.parse(message.content.toString());
 
-				logger.silly('[mq:inbound] Received message: ', envelope);
+					logger.silly('[mq.inbound] Received message', envelope);
 
-				if (envelope.type == types.MQ.ANNOUNCE) {
-					announce(envelope.payload, envelope.datasource_code).done(function() {
+					(function() {
+						switch (envelope.type) {
+							case types.MQ.ANNOUNCE:
+								return announce(envelope.payload, envelope.datasource_code);
+
+							case types.MQ.MEASUREMENT:
+								return measurement(envelope.payload);
+
+							case types.MQ.FIN_MEASUREMENTS:
+								return fin_measurements(envelope.payload, envelope.datasource_code);
+
+							case types.MQ.CHANNEL_HEALTH:
+								return channel_health(envelope.payload);
+
+							default:
+								logger.error('[mq.inbound] Unknown message type %s', envelope.type);
+								return q(false);
+						}
+					})().done(function() {
 						channel.ack(message);
 					}, function(error) {
 						channel.nack(message, null, true)
-						logger.error('[mq:inbound] Error: ' + error.message, error.stack);
+						logger.error('[mq.inbound] Error: ' + error.message, error.stack);
 					});
+				} catch (error) {
+					logger.error('[mq.inbound] Error: ', error.message);
+					channel.nack(message, null, true);
 				}
-			} catch (error) {
-				logger.error('[mq:inbound] Error: ', error.message);
-				channel.nack(message, null, true);
-			}
-		};
+			};
 
-		return channel.assertExchange(
-			config.rabbitmq.exchange,
-			'topic',
-			{durable: true}
-		).then(function() {
-			return channel.assertQueue(config.rabbitmq.queue);
-		}).then(function(queue) {
-			return channel.bindQueue(
-				queue.queue,
+			return channel.assertExchange(
 				config.rabbitmq.exchange,
-				'store'
+				'topic',
+				{durable: true}
 			).then(function() {
-				logger.info('[mq:inbound] Setting consumer tag to: %s', consumerTag);
-
-				// start consuming messages from queue
-				return channel.consume(
+				return channel.prefetch(config.rabbitmq.prefetch);
+			}).then(function() {
+				return channel.assertQueue(config.rabbitmq.queue);
+			}).then(function(queue) {
+				return channel.bindQueue(
 					queue.queue,
-					receive,
-					{
-						noAck: false,
-						consumerTag: consumerTag
-					}
-				);
+					config.rabbitmq.exchange,
+					'store'
+				).then(function() {
+					logger.info('[mq.inbound] Setting consumer tag to: %s', consumerTag);
+
+					// start consuming messages from queue
+					return channel.consume(
+						queue.queue,
+						receive,
+						{
+							noAck: false,
+							consumerTag: consumerTag
+						}
+					);
+				});
 			});
+		}).then(function() {
+			logger.info('[mq.inbound] Initialized MQ inbound service');
+			return true;
 		});
-	}).then(function() {
-		return true;
 	});
-});
+};
+
+
+module.exports = {
+	init: init
+};

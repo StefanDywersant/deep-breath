@@ -10,27 +10,208 @@ store:
     url: 'amqp://localhost'
     exchange: 'deepbreath'
     queue: 'store'
+    prefetch: 10
   database:
-    url: 'postgres://maciaszk@localhost:5432/deepbreath'
+    url: '' # set in local.yaml
+  webserver:
+    port: 8081 # overwritten in environment specific file
+    hostname: 'localhost' # overwritten in environment specific file
+    childs: 2
+  stations:
+    nearest:
+      limit: 10
+      distance: 300000
+    search:
+      limit: 10
+
+mobile:
+  webserver:
+    port: 8080 # overwritten in environment specific file
+    hostname: 'localhost' # overwritten in environment specific file
+    childs: 2
+
+  parameter_groups:
+    - code: 'air_quality'
+      name: 'Jakość powietrza'
+      parameters:
+        - co
+        - pm10
+        - pm2.5
+        - bzn
+        - o3
+        - so2
+        - no2
+        - no
+        - nox
+        - pb
+        - tln
+        - oxy
+        - mpxy
+        - ebzn
+        - pm10_as
+        - pm10_bap
+        - pm10_cd
+        - pm10_ni
+        - pm10_pb
+
+    - code: 'weather'
+      name: 'Dane pogodowe'
+      parameters:
+        - temp
+        - rain
+        - humid
+        - press
+        - ws
+        - wd
+        - rad
+
+aqi:
+  webserver:
+    port: 8082 # overwritten in environment specific file
+    hostname: 'localhost' # overwritten in environment specific file
+    childs: 2
 
 datasource:
-  pl-wielkopolskie:
+  dacsystem:
+    origins:
+      - code: 'pl-wielkopolskie'
+        voivodeship: 'wielkopolskie'
+        rabbitmq:
+          queue: 'datasource.pl-wielkopolskie'
+          pattern: 'datasource:pl-wielkopolskie'
+        api:
+          host: 'powietrze.poznan.wios.gov.pl'
+
+      - code: 'pl-zachodniopomorskie'
+        voivodeship: 'zachodniopomorskie'
+        rabbitmq:
+          queue: 'datasource.pl-zachodniopomorskie'
+          pattern: 'datasource:pl-zachodniopomorskie'
+        api:
+          host: 'powietrze.wios.szczecin.pl'
+
+      - code: 'pl-lubuskie'
+        voivodeship: 'lubuskie'
+        rabbitmq:
+          queue: 'datasource.pl-lubuskie'
+          pattern: 'datasource:pl-lubuskie'
+        api:
+          host: '80.53.180.198'
+
+      - code: 'pl-slaskie'
+        voivodeship: 'śląskie'
+        rabbitmq:
+          queue: 'datasource.pl-slaskie'
+          pattern: 'datasource:pl-slaskie'
+        api:
+          host: 'powietrze.katowice.wios.gov.pl'
+
+      - code: 'pl-dolnoslaskie'
+        voivodeship: 'dolnośląskie'
+        rabbitmq:
+          queue: 'datasource.pl-dolnoslaskie'
+          pattern: 'datasource:pl-dolnoslaskie'
+        api:
+          host: 'air.wroclaw.pios.gov.pl'
+
+      - code: 'pl-malopolskie'
+        voivodeship: 'malopolskie'
+        rabbitmq:
+          queue: 'datasource.pl-malopolskie'
+          pattern: 'datasource:pl-malopolskie'
+        api:
+          host: 'monitoring.krakow.pios.gov.pl'
+
+      - code: 'pl-opolskie'
+        voivodeship: 'opolskie'
+        rabbitmq:
+          queue: 'datasource.pl-opolskie'
+          pattern: 'datasource:pl-opolskie'
+        api:
+          host: 'www.opole.pios.gov.pl'
+          port: 81
+
+      - code: 'pl-podkarpackie'
+        voivodeship: 'podkarpackie'
+        rabbitmq:
+          queue: 'datasource.pl-podkarpackie'
+          pattern: 'datasource:pl-podkarpackie'
+        api:
+          host: 'stacje.wios.rzeszow.pl'
+
+    address:
+      cities:
+        - 'Wrocław'
+        - 'Osieczów'
+        - 'Działoszyn'
+        - 'Wroc��aw'
+        - 'Zielona Gora'
+        - 'Gorzow Wlkp'
+        - 'Smolary Bytnickie'
+        - 'Wschowa'
+        - 'Sulęcin'
+        - 'Olkusz'
+        - 'Trzebinia'
+        - 'Szarów'
+        - 'Kraków'
+        - 'Tarnów'
+        - 'Kaszów'
+        - 'Limanowa'
+        - 'Szczawnica'
+        - 'Kęty'
+        - 'Słomniki'
+        - 'Myślenice'
+        - 'Bukowno'
+        - 'Gorlice'
+        - 'Bochnia'
+        - 'Tuchów'
+        - 'Niepołomice'
+        - 'Tarnów'
+        - 'Nowy Sącz'
+        - 'Zakopane'
+        - 'Kędzierzyn-Koźle'
+        - 'Głubczyce'
+        - 'Zdzieszowice'
+        - 'Opole'
+        - 'Olesno'
+        - 'Kluczbork'
+        - 'Nysa'
+        - 'Nisko'
+        - 'Jarosław'
+        - 'Mielec'
+        - 'Sanok'
+        - 'Tarnobrzeg'
+        - 'Krempna'
+        - 'Jasło'
+        - 'Rzeszów'
+        - 'Przemyśl'
+        - 'Mielec'
+        - 'Dębica'
+        - 'Krosno'
+        - 'Katowice'
+        - 'Częstochowa'
+        - 'Czerwionka - Leszczyny'
+        - 'Złoty Potok'
+        - 'Lubliniec'
+        - 'Godów'
+        - 'Pszczyna'
+        - 'Tarnowskie Góry'
+        - 'Bielsko-Biała'
+
     api:
-      host: 'powietrze.poznan.wios.gov.pl'
       paths:
-        stations: '/'
+        stations: '/stacje/aktywne'
         configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
         measurements: '/dane-pomiarowe/pobierz'
-      ratelimit: 2000
+      ratelimit: 200
+      retries: 10
 
     rabbitmq:
       url: 'amqp://localhost'
       exchange: 'deepbreath'
-      queue: 'datasource.pl-wielkopolskie'
 
     measurements:
-      start_date_epsilon: 86400000 # 24 hours
-      cache_ttl: 1800000 # 30 mins
+      update_interval: 300000 # 5 mins
 
     configuration:
       cache_ttl: 3600000 # 1 hour
@@ -41,4 +222,7 @@ datasource:
     redis:
       host: 'localhost'
       port: 6379
-      prefix: 'deep-breath:pl-wielkopolskie:'
+      prefix: '' # set in environment specific file
+
+    health:
+      interval: 1800000
