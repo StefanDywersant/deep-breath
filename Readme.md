@@ -39,7 +39,7 @@ node aqi
 node mobile
 ```
 
-Default environment is set to *localhost*. You can overwrite this with *NODE_ENV* environment variable.
+Default environment is set to *localhost*. You can override this with *NODE_ENV* environment variable.
 
 
 ## Tests
