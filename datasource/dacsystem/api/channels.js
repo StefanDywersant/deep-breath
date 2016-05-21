@@ -43,8 +43,4 @@ var all = function() {
 };
 
 
-module.exports = {
-	byStationId: byStationId,
-	byId: byId,
-	all: all
-};
+module.exports = {byStationId, byId, all};

@@ -235,6 +235,8 @@ datasource:
     rabbitmq:
       queue: 'datasource.pl-mazowieckie'
       pattern: 'datasource:pl-mazowieckie'
+      url: 'amqp://localhost'
+      exchange: 'deepbreath'
 
     api:
       host: 'sojp.wios.warszawa.pl'
@@ -242,18 +244,14 @@ datasource:
         stations: '/gmaps/stc_pl.xml'
         station: '/index.php?page=opisy-stacji&t=1&site_id=<id>&o=<tab>'
 #        configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
-#        measurements: '/dane-pomiarowe/pobierz'
+        measurements: '/?page=raport-godzinowy&data=<date>&site_id=<station_id>&csq_id=<channels_set>&dane=w1'
       ratelimit: 200
       retries: 10
-
-    rabbitmq:
-      url: 'amqp://localhost'
-      exchange: 'deepbreath'
 
     measurements:
       update_interval: 300000 # 5 mins
 
-    configuration:
+    channels:
       cache_ttl: 3600000 # 1 hour
 
     stations:

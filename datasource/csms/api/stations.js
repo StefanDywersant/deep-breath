@@ -167,6 +167,18 @@ var entitize = function(attributes) {
 };
 
 
+var retry = function(func, left) {
+	return func().fail(function(error) {
+		logger.warn('[api.stations:retry] Download failed: %s. Retries left: %d', error.message, left);
+
+		if (!--left)
+			throw new Error('No more retries left: ' + error.message);
+
+		return retry(func, left);
+	});
+};
+
+
 var stationsList = function() {
 	return rateLimit()
 		.then(() => requests.get(config.api.paths.stations))
@@ -183,18 +195,27 @@ var stationsList = function() {
 				return properties;
 			});
 		})
-		.then((list) => Array.prototype.slice.call(list))
+		.then((stations) => Array.prototype.slice.call(stations))
+		.then((stations) => {
+			return stations.reduce((stations, station) => {
+				if (!stations.find((s) => s.site_id == station.site_id))
+					stations.push(station);
+
+				return stations;
+			}, [])
+		})
 };
 
 
 var stationPage = function(stationXML) {
 	var path = config.api.paths.station.replace('<id>', stationXML.site_id);
 
-	var readAttributes = function(page, path) {
+	var readAttributes = function(page, path, tab) {
 		var $ = cheerio.load(page),
 			attributes = {};
 
-//		console.log(id, path, page.length, $(path).length, page.indexOf('id="dscC"'), page.indexOf('id="dscE"'));
+		if ($('#table ul.chs li.curr a').text() != tab)
+			throw new Error(`Got different page than requested ;-) station_id=${stationXML.site_id} tab=${tab}`);
 
 		$(path).each(function() {
 			var $el = $(this),
@@ -225,8 +246,8 @@ var stationPage = function(stationXML) {
 				xml: stationXML
 			};
 
-			var generalAttributes = readAttributes(general, '#dscC tbody th'),
-				environmentAttributes = readAttributes(environment, '#dscE tbody th');
+			var generalAttributes = readAttributes(general, '#dscC tbody th', 'ogólnie'),
+				environmentAttributes = readAttributes(environment, '#dscE tbody th', 'otoczenie');
 
 			Object.keys(generalAttributes).forEach((key) => attributes[key] = generalAttributes[key]);
 			Object.keys(environmentAttributes).forEach((key) => attributes[key] = environmentAttributes[key]);
@@ -243,7 +264,7 @@ var all = function() {
 				return stations;
 
 			return stationsList()
-				.then((stationsXML) => q.all(stationsXML.map(stationPage)))
+				.then((stationsXML) => q.all(stationsXML.map((stationXML) => retry(() => stationPage(stationXML), 10))))
 				.then((stations) => redis.set('api:stations', stations, config.stations.cache_ttl));
 		});
 };

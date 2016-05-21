@@ -1,9 +1,9 @@
 var redis = require('../../service/redis'),
 	config = require('config').datasource.csms,
-	logger = require('../../service/logger');
-	//mqInbound = require('./mq/inbound'),
+	logger = require('../../service/logger'),
+	mqInbound = require('./mq/inbound'),
 	//updates = require('./daemon/updates'),
-	//emitAnnounce = require('./mq/emitter/announce'),
+	emitAnnounce = require('./mq/emitter/announce');
 	//health = require('./daemon/health');
 
 
@@ -19,17 +19,12 @@ config.redis.prefix += 'pl-mazowieckie:';
 
 redis.init(config.redis);
 
-/*mqInbound()
+mqInbound()
 	.then(emitAnnounce)
-	.then(updates.init)
-	.then(health.init)
+//	.then(updates.init)
+//	.then(health.init)
 	.done(function() {
 		logger.info('[app] Initialized CSMS(pl-mazowieckie) datasource');
 	}, function(error) {
 		logger.error('[app] Error during initialization: %s', error.stack);
 	});
-*/
-
-require('./api/stations').all()
-	.then((stations) => console.log(stations))
-	.fail(error => console.log(error.stack));
