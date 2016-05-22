@@ -8,7 +8,8 @@ var requests = require('./requests'),
 	rateLimit = require('q-ratelimit')(500),
 	cheerio = require('cheerio'),
 	types = require('../../../types/types'),
-	logger = require('../../../service/logger');
+	logger = require('../../../service/logger'),
+	retry = require('../../../service/retry');
 
 
 const CHANNELS_SET_SUBSTANCES = 1414,
@@ -69,18 +70,6 @@ var fetchStationChannels = function(stationId) {
 				}, [])
 				.map(channelId => entitize(channelId, stationId));
 		});
-};
-
-
-var retry = function(func, left) {
-	return func().fail(function(error) {
-		logger.warn('[api.channels:retry] Download failed: %s. Retries left: %d', error.message, left);
-
-		if (!--left)
-			throw new Error('No more retries left: ' + error.message);
-
-		return retry(func, left);
-	});
 };
 
 

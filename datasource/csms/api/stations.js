@@ -5,6 +5,7 @@ var requests = require('./requests'),
 	q = require('q'),
 	types = require('../../../types/types'),
 	logger = require('../../../service/logger'),
+	retry = require('../../../service/retry'),
 	entities = require('entities'),
 	redis = require('../../../service/redis'),
 	rateLimit = require('q-ratelimit')(2000),
@@ -164,18 +165,6 @@ var entitize = function(attributes) {
 		location: location(),
 		flags: method() | classification() | areaType()
 	};
-};
-
-
-var retry = function(func, left) {
-	return func().fail(function(error) {
-		logger.warn('[api.stations:retry] Download failed: %s. Retries left: %d', error.message, left);
-
-		if (!--left)
-			throw new Error('No more retries left: ' + error.message);
-
-		return retry(func, left);
-	});
 };
 
 
