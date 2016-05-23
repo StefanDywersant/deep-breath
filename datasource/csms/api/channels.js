@@ -5,7 +5,7 @@ var requests = require('./requests'),
 	config = require('config').datasource.csms,
 	q = require('q'),
 	redis = require('../../../service/redis'),
-	rateLimit = require('q-ratelimit')(500),
+	rateLimit = require('q-ratelimit')(2500),
 	cheerio = require('cheerio'),
 	types = require('../../../types/types'),
 	logger = require('../../../service/logger'),
@@ -40,7 +40,7 @@ var formatDay = function(date) {
 
 
 var fetchStationChannels = function(stationId) {
-	let path = config.api.paths.measurements
+	let path = config.api.paths.channels
 		.replace('<date>', formatDay(new Date()))
 		.replace('<station_id>', stationId);
 

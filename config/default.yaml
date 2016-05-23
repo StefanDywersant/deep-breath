@@ -244,8 +244,9 @@ datasource:
         stations: '/gmaps/stc_pl.xml'
         station: '/index.php?page=opisy-stacji&t=1&site_id=<id>&o=<tab>'
 #        configuration: '/dane-pomiarowe/wczytaj-konfiguracje'
-        measurements: '/?page=raport-godzinowy&data=<date>&site_id=<station_id>&csq_id=<channels_set>&dane=w1'
-      ratelimit: 200
+        channels: '/?page=raport-godzinowy&data=<date>&site_id=<station_id>&csq_id=<channels_set>&dane=w1'
+        measurements: '?page=analiza-pomiarow&t=<method>&p=1&data=<date_from>&data2=<date_to>&csq_id=1417&dane=w1&jssite_id%5B%5D=<station_id>&<channels>'
+      ratelimit: 2500
       retries: 10
 
     measurements:

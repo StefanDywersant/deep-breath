@@ -1,23 +1,5 @@
-var map = {
-	'PM10': 'pm10',
-	'NO2': 'no2',
-	'SO2': 'so2',
-	'O3': 'o3',
-	'CO': 'co',
-	'PM25': 'pm2.5',
-	'temp': 'temp',
-	'wilg': 'humid',
-	'kier': 'wd',
-	'pred': 'ws',
-	'Cisn.atm.': 'press',
-	'opad atm.': 'rain',
-	'prom': 'rad',
-	'Benzen': 'bzn',
-	'Toluen': 'tln',
-	'o-Ksylen': 'oxy',
-	'm,p-Ksylen': 'mpxy',
-	'Etylobenzen': 'ebzn'
-};
+const channel = require('./channel');
+
 
 module.exports = {
 	DATASOURCE: 'pl-mazowieckie',
@@ -28,8 +10,10 @@ module.exports = {
 		return this.STATION(stationId) + ':' + channelId;
 	}),
 	PARAM: function(paramCode) {
-		if (paramCode in map)
-			return map[paramCode];
+		var def = channel.BY_ID(paramCode);
+
+		if (def)
+			return def.code;
 
 		return paramCode;
 	}
