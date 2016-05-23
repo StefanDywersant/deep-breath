@@ -2,8 +2,8 @@ var config = require('config').datasource.csms,
 	rabbitmq = require('../../../service/rabbitmq'),
 	logger = require('../../../service/logger'),
 	os = require('os'),
-	//req_measurements = require('./handler/req_measurements'),
-	//start_updates = require('./handler/start_updates'),
+	req_measurements = require('./handler/req_measurements'),
+	start_updates = require('./handler/start_updates'),
 	types = require('../../../types/types.js'),
 	q = require('q');
 
@@ -28,12 +28,10 @@ var init = function() {
 					(function() {
 						switch (envelope.type) {
 							case types.MQ.REQ_MEASUREMENTS:
-								return q(true);
-//								return req_measurements(envelope.payload);
+								return req_measurements(envelope.payload);
 
 							case types.MQ.START_UPDATES:
-								return q(true);
-//								return start_updates(envelope.payload);
+								return start_updates(envelope.payload);
 
 							default:
 								logger.error('[mq.inbound] Unknown message type %s', envelope.type);

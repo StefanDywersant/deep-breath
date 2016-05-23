@@ -231,7 +231,6 @@ var stationPage = function(stationXML) {
 		.spread(function(general, environment) {
 			var attributes = {
 				id: parseInt(stationXML.site_id),
-					/*measurementsPath: $('.place-right a.image-button').attr('href')*/
 				xml: stationXML
 			};
 

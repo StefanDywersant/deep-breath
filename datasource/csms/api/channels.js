@@ -9,7 +9,8 @@ var requests = require('./requests'),
 	cheerio = require('cheerio'),
 	types = require('../../../types/types'),
 	logger = require('../../../service/logger'),
-	retry = require('../../../service/retry');
+	retry = require('../../../service/retry'),
+	stations = require('./stations');
 
 
 const CHANNELS_SET_SUBSTANCES = 1414,
@@ -85,29 +86,17 @@ var byStationId = function(stationId) {
 };
 
 
-/*var byId = function(id) {
-	return configuration.get().then(function(configuration) {
-		var channels = configuration.channels.filter(function(channel) {
-			return channel.channel_id == id;
-		});
-
-		if (!channels.length)
-			return null;
-
-		return entitize(channels[0]);
-	});
+var byId = function(id, station_id) {
+	return all()
+		.then(channels => channels.find(channel => channel.id == id && channel.station_id == station_id));
 };
 
 
 var all = function() {
-	return configuration.get().then(
-		(configuration) => q.all(configuration.channels.map(entitize))
-	);
+	return stations.all()
+		.then((stations) => q.all(stations.map(station => byStationId(station.id))))
+		.then((stationsChannels) => stationsChannels.reduce((channels, stationChannels) => channels.concat(stationChannels)), []);
 };
-*/
 
-module.exports = {
-	byStationId,
-//	byId: byId,
-//	all: all
-};
+
+module.exports = {byStationId, byId, all};

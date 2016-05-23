@@ -11,7 +11,7 @@ var config = require('config').datasource.csms,
 	cheerio = require('cheerio');
 
 
-var MEASUREMENTS_BEGIN = new Date('01/01/2000'),
+var MEASUREMENTS_BEGIN = new Date('05/20/2016'),
 	HOUR = 60 * 60 * 1000,
 	DAY = 24 * HOUR;
 
@@ -30,8 +30,8 @@ var entitize = function(dataSet) {
 				begin.setHours(begin.getHours() - 1);
 
 				values.push({
-					begin: begin,
-					end: end,
+					begin: begin.getTime(),
+					end: end.getTime(),
 					value: parseFloat(dataSet[channelId][date])
 				});
 
@@ -93,7 +93,15 @@ var fetchAutomatic = function(date, channels, station) {
 				let channelIds = Array.prototype.slice.call($('#table thead tr:first-child th')
 					.slice(1)
 					.map(function () {
-						return $(this).text().replace(/^[a-zA-Z]+-/, '');
+						const regex = new RegExp(CHANNEL.ALL.map(def => `(${def.id})$`).join('|')),
+							title = $(this).text(),
+							matches = title.match(regex);
+
+						if (!matches)
+							throw new Error(`Invalid column name: ${title}`);
+
+						return matches.slice(1)
+							.find(match => !!match);
 					}));
 
 				$('#table tbody tr').each(function() {
@@ -193,11 +201,11 @@ var startDate = function(date, channel, station) {
 			throw new Error('Unknown measurements method: ' + (channel.flags & types.STATION.METHOD._MASK));
 		})();
 
-		return startDateFinder.heuristic(
+		return startDateFinder.accurate(
 			(date) => byDate(date, [channel], station)
 				.then((measurements) => !!measurements.length),
 			date,
-			86400000
+			interval
 		);
 	};
 
