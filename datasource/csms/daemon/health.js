@@ -5,7 +5,7 @@ var stations = require('../api/stations'),
 	types = require('../../../types/types'),
 	emitChannelHealth = require('../mq/emitter/channel_health'),
 	q = require('q'),
-	config = require('config').datasource.dacsystem;
+	config = require('config').datasource.csms;
 
 
 var HOUR = 60 * 60 * 1000,

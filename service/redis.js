@@ -43,7 +43,7 @@ var set = function(key, value, expire) {
 		JSON.stringify(value)
 	).then(function() {
 		if (!expire)
-			return true;
+			return value;
 
 		return q.ninvoke(
 			client,
