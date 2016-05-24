@@ -1,12 +1,14 @@
 'use strict';
 
-var config = require('config').datasource.dacsystem,
+var config = require('config').datasource.csms,
 	requests = require('./requests'),
 	logger = require('../../../service/logger'),
 	startDateFinder = require('../../../service/startdatefinder'),
 	channels = require('./channels'),
 	types = require('../../../types/types'),
-	q = require('q');
+	q = require('q'),
+	CHANNEL = require('../const/channel'),
+	cheerio = require('cheerio');
 
 
 var MEASUREMENTS_BEGIN = new Date('01/01/2000'),
@@ -14,34 +16,27 @@ var MEASUREMENTS_BEGIN = new Date('01/01/2000'),
 	DAY = 24 * HOUR;
 
 
-var entitize = function(apiMeasurements) {
-	return apiMeasurements.series.map(function(serie) {
-		var channel = apiMeasurements.channels.reduce(function(found, channel) {
-			if (found)
-				return found;
-
-			if (channel.param_id == serie.paramId)
-				return channel;
-
-			return null;
-		}, null);
-
-		if (!channel)
-			throw new Error('Channel for param_id=%s not found', serie.paramId);
-
+var entitize = function(dataSet) {
+	return Object.keys(dataSet).map(channelId => {
 		return {
-			channel_id: channel.id,
-			values: serie.data.map(function(apiMeasurement) {
-				var begin = channel.flags & types.STATION.METHOD.AUTOMATIC
-					? parseInt(apiMeasurement[0]) * 1000 - HOUR
-					: parseInt(apiMeasurement[0]) * 1000 - DAY;
+			channel_id: channelId,
+			values: Object.keys(dataSet[channelId]).reduce((values, date) => {
+				if (!dataSet[channelId][date])
+					return values;
 
-				return {
-					begin: begin,
-					end: parseInt(apiMeasurement[0]) * 1000,
-					value: parseFloat(apiMeasurement[1])
-				};
-			})
+				let begin = new Date(date),
+					end = new Date(date);
+
+				begin.setHours(begin.getHours() - 1);
+
+				values.push({
+					begin: begin.getTime(),
+					end: end.getTime(),
+					value: parseFloat(dataSet[channelId][date])
+				});
+
+				return values;
+			}, [])
 		};
 	});
 };
@@ -56,7 +51,7 @@ var formatDay = function(date) {
 		(dd[1] ? dd : '0' + dd[0]),
 		(mm[1] ? mm : '0' + mm[0]),
 		yyyy
-	].join('.');
+	].join('-');
 };
 
 
@@ -71,41 +66,89 @@ var formatMonth = function(date) {
 };
 
 
+var constructPath = function(dateFrom, dateTo, station, method, channels) {
+	return config.api.paths.measurements
+		.replace('<date_from>', formatDay(dateFrom))
+		.replace('<date_to>', formatDay(dateTo))
+		.replace('<station_id>', station.id)
+		.replace('<method>', method == types.CHANNEL.METHOD.AUTOMATIC ? 1 : 3)
+		.replace('<channels>', channels.map((channel) => `jspar_type_id%5B%5D=${CHANNEL.BY_ID(channel.id).param_id}`).join('&'));
+};
+
+
 var fetchAutomatic = function(date, channels, station) {
-	return requests.post(
-		config.api.paths.measurements,
-		{
-			query: JSON.stringify({
-				measType: 'Auto',
-				viewType: 'Station',
-				dateRange: 'Day',
-				date: formatDay(date),
-				viewTypeEntityId: '' + station.id,
-				channels: channels.map(channel => channel.id)
-			})
-		}
-		)
-		.then((result) => JSON.parse(result).data)
-		.then((data) => {
-			data.channels = channels;
-			return data;
+	const CHUNK_SZ = 6;
+
+	// only CHUNK_SZ channels can be requested at once
+	let chunks = [];
+	for (let i = 0, j = channels.length; i < j; i += CHUNK_SZ)
+		chunks.push(channels.slice(i, i + CHUNK_SZ));
+
+	return q.all(chunks.map((channels) => requests.get(constructPath(date, date, station, types.CHANNEL.METHOD.AUTOMATIC, channels))))
+		.then((pages) => {
+			let $s = pages.map(page => cheerio.load(page)),
+				dataSet = {};
+
+			$s.forEach(($) => {
+				let channelIds = Array.prototype.slice.call($('#table thead tr:first-child th')
+					.slice(1)
+					.map(function () {
+						const regex = new RegExp(CHANNEL.ALL.map(def => `(${def.id})$`).join('|')),
+							title = $(this).text(),
+							matches = title.match(regex);
+
+						// mark empty column
+						if (!matches) {
+							logger.warn('[api.measurements:fetchAutomatic] Invalid column name: %s', title);
+							return '-';
+						}
+
+						// return channel identifier
+						return matches.slice(1)
+							.find(match => !!match);
+					}));
+
+				$('#table tbody tr').each(function() {
+					const cols = $(this).children(),
+						date = $(cols.get(0)).text(),
+						dataCols = cols.slice(1);
+
+					dataCols.each(function(i) {
+						if (!(channelIds[i] in dataSet))
+							dataSet[channelIds[i]] = {};
+
+						dataSet[channelIds[i]][date] = $(this).text();
+					});
+				});
+			});
+
+			return dataSet;
+		})
+		.then(dataSet => {
+			// remove empty columns
+			Object.keys(dataSet).forEach(key => {
+				if (key == '-')
+					delete dataSet[key];
+			});
+
+			return dataSet;
 		});
 };
 
 
 var fetchManual = function(date, channels, station) {
 	return requests.post(
-		config.api.paths.measurements,
-		{
-			query: JSON.stringify({
-				measType: 'Manual',
-				viewType: 'Station',
-				dateRange: 'Month',
-				date: formatMonth(date),
-				viewTypeEntityId: '' + station.id,
-				channels: channels.map(channel => channel.id)
-			})
-		}
+			config.api.paths.measurements,
+			{
+				query: JSON.stringify({
+					measType: 'Manual',
+					viewType: 'Station',
+					dateRange: 'Month',
+					date: formatMonth(date),
+					viewTypeEntityId: '' + station.id,
+					channels: channels.map(channel => channel.id)
+				})
+			}
 		)
 		.then((result) => JSON.parse(result).data)
 		.then((data) => {
@@ -181,10 +224,10 @@ var startDate = function(date, channel, station) {
 
 	return find()
 		.then((startDate) => {
-			logger.verbose('[measurements:startDate] Found start date %s for channel %d', startDate, channel.id);
+			logger.verbose('[measurements:startDate] Found start date %s for channel %s', startDate, channel.id);
 			return startDate;
 		});
 };
 
 
-module.exports = {byDate, startDate};
+module.exports = {byDate, startDate, fetchAutomatic};

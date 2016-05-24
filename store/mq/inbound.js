@@ -47,7 +47,7 @@ var init = function() {
 					})().done(function() {
 						channel.ack(message);
 					}, function(error) {
-						channel.nack(message, null, true)
+						channel.nack(message, null, true);
 						logger.error('[mq.inbound] Error: ' + error.message, error.stack);
 					});
 				} catch (error) {
@@ -65,11 +65,7 @@ var init = function() {
 			}).then(function() {
 				return channel.assertQueue(config.rabbitmq.queue);
 			}).then(function(queue) {
-				return channel.bindQueue(
-					queue.queue,
-					config.rabbitmq.exchange,
-					'store'
-				).then(function() {
+				return channel.bindQueue(queue.queue, config.rabbitmq.exchange, 'store').then(function() {
 					logger.info('[mq.inbound] Setting consumer tag to: %s', consumerTag);
 
 					// start consuming messages from queue

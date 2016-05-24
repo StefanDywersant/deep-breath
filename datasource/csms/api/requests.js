@@ -1,8 +1,7 @@
 var http = require('http'),
 	q = require('q'),
 	querystring = require('querystring'),
-	config = require('config').datasource.dacsystem,
-	origin = require('../config/origin'),
+	config = require('config').datasource.csms,
 	logger = require('../../../service/logger'),
 	retry = require('../../../service/retry'),
 	rateLimit = require('q-ratelimit')(config.api.ratelimit);
@@ -11,8 +10,8 @@ var http = require('http'),
 var get = function(path) {
 	return rateLimit().then(function() {
 		var deferred = q.defer(),
-			host = origin.api.host,
-			port = 'port' in origin.api ? origin.api.port : 80,
+			host = config.api.host,
+			port = 'port' in config.api ? origin.api.port : 80,
 			startTime = Date.now();
 
 		logger.silly('[api.requests:get] Request http://' + host + path);
@@ -56,8 +55,8 @@ var post = function(path, data) {
 	return rateLimit().then(function() {
 		var deferred = q.defer(),
 			postData = querystring.stringify(data),
-			host = origin.api.host,
-			port = 'port' in origin.api ? origin.api.port : 80,
+			host = config.api.host,
+			port = 'port' in config.api ? config.api.port : 80,
 			startTime = Date.now();
 
 		logger.silly('[api.requests:post] Request http://' + host + path);
