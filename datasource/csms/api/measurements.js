@@ -11,7 +11,7 @@ var config = require('config').datasource.csms,
 	cheerio = require('cheerio');
 
 
-var MEASUREMENTS_BEGIN = new Date('05/20/2016'),
+var MEASUREMENTS_BEGIN = new Date('01/01/2000'),
 	HOUR = 60 * 60 * 1000,
 	DAY = 24 * HOUR;
 
@@ -97,15 +97,19 @@ var fetchAutomatic = function(date, channels, station) {
 							title = $(this).text(),
 							matches = title.match(regex);
 
-						if (!matches)
-							throw new Error(`Invalid column name: ${title}`);
+						// mark empty column
+						if (!matches) {
+							logger.warn('[api.measurements:fetchAutomatic] Invalid column name: %s', title);
+							return '-';
+						}
 
+						// return channel identifier
 						return matches.slice(1)
 							.find(match => !!match);
 					}));
 
 				$('#table tbody tr').each(function() {
-					let cols = $(this).children(),
+					const cols = $(this).children(),
 						date = $(cols.get(0)).text(),
 						dataCols = cols.slice(1);
 
@@ -116,6 +120,15 @@ var fetchAutomatic = function(date, channels, station) {
 						dataSet[channelIds[i]][date] = $(this).text();
 					});
 				});
+			});
+
+			return dataSet;
+		})
+		.then(dataSet => {
+			// remove empty columns
+			Object.keys(dataSet).forEach(key => {
+				if (key == '-')
+					delete dataSet[key];
 			});
 
 			return dataSet;

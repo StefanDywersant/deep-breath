@@ -5,7 +5,6 @@ var requests = require('./requests'),
 	config = require('config').datasource.csms,
 	q = require('q'),
 	redis = require('../../../service/redis'),
-	rateLimit = require('q-ratelimit')(2500),
 	cheerio = require('cheerio'),
 	types = require('../../../types/types'),
 	logger = require('../../../service/logger'),
@@ -46,9 +45,9 @@ var fetchStationChannels = function(stationId) {
 		.replace('<station_id>', stationId);
 
 	return q.all([
-			rateLimit().then(() => requests.get(path.replace('<channels_set>', CHANNELS_SET_SUBSTANCES))),
-			rateLimit().then(() => requests.get(path.replace('<channels_set>', CHANNELS_SET_WEATHER))),
-			rateLimit().then(() => requests.get(path.replace('<channels_set>', CHANNELS_SET_CARBOHYDRATES)))
+			requests.get(path.replace('<channels_set>', CHANNELS_SET_SUBSTANCES)),
+			requests.get(path.replace('<channels_set>', CHANNELS_SET_WEATHER)),
+			requests.get(path.replace('<channels_set>', CHANNELS_SET_CARBOHYDRATES))
 		])
 		.then((pages) => {
 			let $s = pages.map((page) => cheerio.load(page));

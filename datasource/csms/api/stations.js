@@ -8,7 +8,6 @@ var requests = require('./requests'),
 	retry = require('../../../service/retry'),
 	entities = require('entities'),
 	redis = require('../../../service/redis'),
-	rateLimit = require('q-ratelimit')(2000),
 	config = require('config').datasource.csms;
 
 
@@ -169,35 +168,65 @@ var entitize = function(attributes) {
 
 
 var stationsList = function() {
-	return rateLimit()
-		.then(() => requests.get(config.api.paths.stations))
-		.then((xml) => {
-			let $ = cheerio.load(xml);
+	var fetchAutomatic = function() {
+		return requests.get(config.api.paths.pre_stations.replace('<method>', 1))
+			.then(() => requests.get(config.api.paths.stations));
+	};
 
-			return $('station').map(function() {
-				let properties = {};
 
-				$(this).children().each(function() {
-					properties[this.tagName] = $(this).text();
-				});
+	var fetchManual = function() {
+		return requests.get(config.api.paths.pre_stations.replace('<method>', 3))
+			.then(() => requests.get(config.api.paths.stations));
+	};
 
-				return properties;
+
+	var parse = function(xml) {
+		const $ = cheerio.load(xml);
+
+		let stations = $('station').map(function() {
+			const properties = {};
+
+			$(this).children().each(function() {
+				properties[this.tagName] = $(this).text();
 			});
-		})
-		.then((stations) => Array.prototype.slice.call(stations))
-		.then((stations) => {
-			return stations.reduce((stations, station) => {
+
+			return properties;
+		});
+
+		return Array.prototype.slice.call(stations)
+			.reduce((stations, station) => {
 				if (!stations.find((s) => s.site_id == station.site_id))
 					stations.push(station);
 
 				return stations;
-			}, [])
-		})
+			}, []);
+	};
+
+
+	var stations = [];
+
+
+	return fetchAutomatic()
+		.then(xml => {
+			return stations = stations.concat(
+				parse(xml)
+					.map(station => {station.flags = types.STATION.METHOD.AUTOMATIC; return station})
+			);
+		})/*
+		.then(fetchManual)
+		.then(xml => {
+			return stations.concat(
+				parse(xml)
+					.map(station => {station.flags = types.STATION.METHOD.MANUAL; return station})
+			)
+		})*/;
 };
 
 
 var stationPage = function(stationXML) {
-	var path = config.api.paths.station.replace('<id>', stationXML.site_id);
+	var path = config.api.paths.station
+		.replace('<id>', stationXML.site_id)
+		.replace('<method>', stationXML.flags == types.STATION.METHOD.AUTOMATIC ? 1 : 3);
 
 	var readAttributes = function(page, path, tab) {
 		var $ = cheerio.load(page),
@@ -225,8 +254,8 @@ var stationPage = function(stationXML) {
 	};
 
 	return q.all([
-			rateLimit().then(() => requests.get(path.replace('<tab>', 1))),
-			rateLimit().then(() => requests.get(path.replace('<tab>', 2)))
+			requests.get(path.replace('<tab>', 1)),
+			requests.get(path.replace('<tab>', 2))
 		])
 		.spread(function(general, environment) {
 			var attributes = {
@@ -259,14 +288,8 @@ var all = function() {
 
 
 var byId = function(id) {
-	return all().then(function(stations) {
-		return stations.reduce(function(found, station) {
-			if (found)
-				return found;
-
-			return station.id == id ? station : null;
-		}, null);
-	});
+	return all()
+		.then(stations => stations.find(station => station.id == id));
 };
 
 
@@ -275,4 +298,4 @@ var byChannel = function(channel) {
 };
 
 
-module.exports = {all, byId, byChannel};
+module.exports = {all, byId, byChannel, stationsList};
